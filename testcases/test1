@@ -1,0 +1,3 @@
+int main(){
+int sum2 = [&]() -> { return sum; }(12)+5;
+}
