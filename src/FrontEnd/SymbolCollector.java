@@ -2,9 +2,11 @@ package FrontEnd;
 
 import AST.*;
 import Mutil.GlobalScope;
+import Mutil.Position;
 import Mutil.Scope;
 import Mutil.error.SemanticError;
 import Mutil.type.Type;
+import org.antlr.v4.runtime.misc.Pair;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -12,6 +14,7 @@ import java.util.Objects;
 public class SymbolCollector implements AstVisitor {
     public Scope globalScope;
     public Type nowClassType;
+    public Type currentVarType;
     //public Type nowVarType;
 
     public SymbolCollector(GlobalScope globalScope){
@@ -32,6 +35,30 @@ public class SymbolCollector implements AstVisitor {
 
     }
 
+
+    public void visitTypeName(String typeName, Position typePosition, int typeNUM){
+        Type type = new Type();
+        type.isVar = true;
+        type.typeName = typeName;//Array return the nameType
+        boolean isId = true;//封装大失败
+        if(Objects.equals(type.typeName, "int")){type.isInt=true;isId = false;}
+        if(Objects.equals(type.typeName, "bool")){type.isBool=true;isId = false;}
+        if(Objects.equals(type.typeName, "string")){type.isString=true;isId = false;}
+        if(Objects.equals(type.typeName, "void")){throw new SemanticError("VarDef type can't be void",typePosition);}
+        if(isId){//要看这个id是否存在
+            type.isId = true;
+//            if(!currentScope.containClass(type.typeName,true)){
+//                throw new SemanticError("use an undeclared class to define var",typePosition);
+//            }
+        }
+        if(typeNUM!=0){
+            type.isArray=true;
+            type.numOfArray = typeNUM;
+        }
+        //varDefNode.acceptVisitor(this);
+        type.position = typePosition;
+        currentVarType = type;
+    }
 
     @Override
     public void visit(ArrayTypeNode node) {
@@ -73,13 +100,6 @@ public class SymbolCollector implements AstVisitor {
                 throw new SemanticError("MainFn in class",funcDefNode.getPosition());
             }
 
-            //这个我在builder的阶段就已经做了，所以我应该不需要再做一次了，之后再精简一波吧
-//            if(funcDefNode.getIdentifier()==node.getIdentifier()){//constructor
-//                if (funcDefNode.hasTypeNode()||funcDefNode.hasParamList())throw new SemanticError("classConstructor can't have typeNode or Params",node.getPosition());
-//            }else {
-//                if (!funcDefNode.hasTypeNode())throw new SemanticError("only constructor haven't typeNode",node.getPosition());
-//            }
-
             Type type = new Type();
             type.isFunc = true;
             if(funcDefNode.hasTypeNode()) type.typeName = funcDefNode.getTypeNode().getTypename();
@@ -99,8 +119,20 @@ public class SymbolCollector implements AstVisitor {
             }
 
 
-            //if(nowClassType.funcMembers.containsKey(funcDefNode.getIdentifier())){throw new SemanticError("repeated funcName in class",funcDefNode.getPosition());}
-            //nowClassType.funcMembers.put(funcDefNode.getIdentifier(), type);
+            type.defineFunc();
+
+            if (it.getParamList()!=null){
+                for(var it2: it.getParamList()){
+                    if(it2.getInit()!=null){
+                        throw new SemanticError("param in funcDef can't have init",node.getPosition());
+                    }
+
+                    visitTypeName(it2.getTypeNode().getTypename(),it2.getPosition(),it2.getTypeNode().getNum());
+                    type.params.add(new Pair<>(it.getIdentifier(),currentVarType));
+                    //currentScope.putVar(it.getIdentifier(),currentVarType, it.getPosition());//好像没什么用处，因为后面会跳出这个作用域//有用，因为会进入函数体里面
+                }
+            }
+
             nowClassType.addFuncMembers(funcDefNode.getIdentifier(),type);
         }
 
@@ -259,6 +291,21 @@ public class SymbolCollector implements AstVisitor {
                     type.numOfArray = ((ArrayTypeNode)(funcDefNode.getTypeNode())).getNum();
                 }
                 type.position = funcDefNode.getPosition();
+
+                type.defineFunc();
+
+                if (((FuncDefNode) it).getParamList()!=null){
+                    for(var it2: ((FuncDefNode) it).getParamList()){
+                        if(it2.getInit()!=null){
+                            throw new SemanticError("param in funcDef can't have init",node.getPosition());
+                        }
+
+                        visitTypeName(it2.getTypeNode().getTypename(),it2.getPosition(),it2.getTypeNode().getNum());
+                        type.params.add(new Pair<>(((FuncDefNode) it).getIdentifier(),currentVarType));
+                        //currentScope.putVar(it.getIdentifier(),currentVarType, it.getPosition());//好像没什么用处，因为后面会跳出这个作用域//有用，因为会进入函数体里面
+                    }
+                }
+
 
                 globalScope.putFunc(funcDefNode.getIdentifier(),type,funcDefNode.getPosition());
             }

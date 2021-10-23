@@ -17,9 +17,9 @@ import java.io.*;
 //bullshit. I should not give up my code. I should make him better just like my shit(run :-)
 public class Main{
     public static void main(String[] args) throws Exception{
-        //String name = "testcases/testcase/sema/basic-package/basic-30.mx";
-        //InputStream input = new FileInputStream(name);
-        InputStream input = System.in;
+        String name = "testcases/testcase/sema/basic-package/basic-1.mx";
+        InputStream input = new FileInputStream(name);
+        //InputStream input = System.in;
         try {
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();

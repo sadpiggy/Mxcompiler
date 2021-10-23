@@ -3,14 +3,11 @@ package AST;
 import Mutil.Position;
 import Mutil.error.SemanticError;
 import Mutil.error.SyntaxError;
-import Mutil.type.Type;
 import Parser.MxstarBaseVisitor;
 import Parser.MxstarParser;
-import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 public class AstBuilder extends MxstarBaseVisitor<AstNode> {
@@ -358,8 +355,8 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
     @Override
     public AstNode visitSuffixExpr(MxstarParser.SuffixExprContext ctx) {
         SuffixExprNode.Op op = null;
-        if(ctx.suffix.getText()=="++")op = SuffixExprNode.Op.SufPlus;
-        if(ctx.suffix.getText()=="--")op = SuffixExprNode.Op.SufMinus;
+        if(Objects.equals(ctx.suffix.getText(), "++"))op = SuffixExprNode.Op.SufPlus;
+        if(Objects.equals(ctx.suffix.getText(), "--"))op = SuffixExprNode.Op.SufMinus;
         return new SuffixExprNode(
                 new Position(ctx.getStart()),
                 ctx.getText(),
@@ -372,12 +369,12 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
     public AstNode visitPrefixExpr(MxstarParser.PrefixExprContext ctx) {
         PrefixExprNode.Op op =null;
         String prefixOp = ctx.prefix.getText();
-        if(prefixOp=="++")op = PrefixExprNode.Op.PrePlusPlus;
-        if(prefixOp=="--")op = PrefixExprNode.Op.PreMinusMinus;
-        if(prefixOp=="+")op = PrefixExprNode.Op.SignPos;
-        if(prefixOp=="-")op = PrefixExprNode.Op.SignNeg;
-        if(prefixOp=="~")op = PrefixExprNode.Op.BitWiseNot;
-        if(prefixOp=="!")op = PrefixExprNode.Op.LogicalNot;
+        if(Objects.equals(prefixOp, "++"))op = PrefixExprNode.Op.PrePlusPlus;
+        if(Objects.equals(prefixOp, "--"))op = PrefixExprNode.Op.PreMinusMinus;
+        if(Objects.equals(prefixOp, "+"))op = PrefixExprNode.Op.SignPos;
+        if(Objects.equals(prefixOp, "-"))op = PrefixExprNode.Op.SignNeg;
+        if(Objects.equals(prefixOp, "~"))op = PrefixExprNode.Op.BitWiseNot;
+        if(Objects.equals(prefixOp, "!"))op = PrefixExprNode.Op.LogicalNot;
         return new PrefixExprNode(
                 new Position(ctx.getStart()),
                 ctx.getText(),

@@ -126,7 +126,7 @@ public class SemanticChecker implements AstVisitor {
         paramType.isInt = true;
         paramType.typeName = "int";
         buildInFuncType.params.add(new Pair<>("n",paramType));
-        globalScope.putFunc("printLnInt",buildInFuncType,new Position(0,0));
+        globalScope.putFunc("printlnInt",buildInFuncType,new Position(0,0));
         //string getString()
         buildInFuncType = new Type();
         buildInFuncType.defineFunc();
@@ -168,7 +168,7 @@ public class SemanticChecker implements AstVisitor {
         node.getrExpr().acceptVisitor(this);
         Type rExprType = currentExprType;
         if (!lExprType.isAssignAble)throw new SemanticError("only lValue can be assigned", node.getPosition());
-        if (!lExprType.isArray) {
+        if ((!lExprType.isArray)&&(!lExprType.isId)) {
             if (!Objects.equals(lExprType.typeName, rExprType.typeName))
                 throw new SemanticError("wrong type in assignExpr", node.getPosition());
         }
@@ -385,15 +385,17 @@ public class SemanticChecker implements AstVisitor {
         Type funcType = currentScope.getFuncType(node.getIdentifier(),true);
         if (node.getParams()==null||node.getParams().size()==0){
             if (funcType.params.size()!=0)
-                throw new SemanticError("wrong params in funcCall", node.getPosition());
+                throw new SemanticError("wrong params in funcCall1", node.getPosition());
         }else {
-            if (funcType.params.size()!=node.getParams().size())throw new SemanticError("wrong params in funcCall",node.getPosition());
+
+            //System.out.println(funcType.params.size());
+
+            if (funcType.params.size()!=node.getParams().size())throw new SemanticError("wrong params in funcCall2",node.getPosition());
             int i = 0;
             for (var it : node.getParams()){
                 it.acceptVisitor(this);
                 Type formParamType = funcType.params.get(i).b;
                 if ((!Objects.equals(currentExprType.typeName, formParamType.typeName))||currentExprType.numOfArray!= formParamType.numOfArray)throw new SemanticError("wrong type of params in funcCall", node.getPosition());
-                if (currentExprType.numOfArray!= formParamType.numOfArray)throw new SemanticError("wrong type of params in funcCall", node.getPosition());
                 i++;
             }
         }
@@ -408,41 +410,22 @@ public class SemanticChecker implements AstVisitor {
         currentScope.inFunc = true;
         node.funcScope = currentScope;
 
-        currentFuncType.defineFunc();
+        //currentFuncType.defineFunc();
 
         if (currentFuncType.isId){
             if (!globalScope.containClass(currentFuncType.typeName,false))throw new SemanticError("no this class in the globalScope", node.getPosition());
         }
 
+        //currentFuncType.defineFunc();
+
         if (node.getParamList()!=null){
         for(var it: node.getParamList()){
-            if(it.getInit()!=null){
-                throw new SemanticError("param in funcDef can't have init",node.getPosition());
-            }
+//            if(it.getInit()!=null){
+//                throw new SemanticError("param in funcDef can't have init",node.getPosition());
+//            }
 
-//            Type paramType = new Type();
-//            paramType.isVar = true;
-//            paramType.typeName = it.getTypeNode().getTypename();//Array return the nameType
-//            boolean isId = true;//封装大失败
-//            if(Objects.equals(paramType.typeName, "int")){paramType.isInt=true;isId = false;}
-//            if(Objects.equals(paramType.typeName, "bool")){paramType.isBool=true;isId = false;}
-//            if(Objects.equals(paramType.typeName, "string")){paramType.isString=true;isId = false;}
-//            if(Objects.equals(paramType.typeName, "void")){throw new SemanticError("VarDef type can't be void",it.getPosition());}
-//            if(isId){//要看这个id是否存在
-//                paramType.isId = true;
-//                if(!currentScope.containClass(paramType.typeName,true)){
-//                    throw new SemanticError("use an undeclared class to define var",it.getPosition());
-//                }
-//            }
-//            if(it.getTypeNode() instanceof ArrayTypeNode){
-//                paramType.isArray=true;
-//                paramType.numOfArray = ((ArrayTypeNode)(it.getTypeNode())).getNum();
-//            }
-//            //varDefNode.acceptVisitor(this);
-//            paramType.position = it.getPosition();
-            currentFuncType.defineFunc();
             visitTypeName(it.getTypeNode().getTypename(),it.getPosition(),it.getTypeNode().getNum());
-            currentFuncType.params.add(new Pair<>(it.getIdentifier(),currentVarType));
+            //currentFuncType.params.add(new Pair<>(it.getIdentifier(),currentVarType));
             currentScope.putVar(it.getIdentifier(),currentVarType, it.getPosition());//好像没什么用处，因为后面会跳出这个作用域//有用，因为会进入函数体里面
              }
         }
@@ -471,12 +454,6 @@ public class SemanticChecker implements AstVisitor {
     //if(cond)
     @Override
     public void visit(IfStmtNode node) {
-//        Scope ifScope = new Scope(currentScope);
-//        ifScope.inFunc = currentScope.inFunc;
-//        ifScope.inClass = currentScope.inClass;
-//        ifScope.inLoop = currentScope.inLoop;
-//        currentScope = ifScope;
-
         currentScope.inLoop = true;
 
         if (node.getConditionExpr()==null)throw new SemanticError("conditionExpr in ifExpr can't be empty", node.getPosition());
@@ -567,26 +544,29 @@ public class SemanticChecker implements AstVisitor {
             if(!classType.funcMembers.containsKey(node.getMethodName()))throw new SemanticError("no this method in class",node.getPosition());
             Type funcType = classType.funcMembers.get(node.getMethodName());
 
-            if (typeName==node.getMethodName())throw new SemanticError("can use constructor as method", node.getPosition());
+            if (Objects.equals(typeName, node.getMethodName()))throw new SemanticError("can use constructor as method", node.getPosition());
 
             var formParamList = funcType.params;
             var realParamList = node.getParams();
             if (realParamList==null){
                 if (formParamList==null||formParamList.size()==0){}
-                else throw new SemanticError("wrong params in methodCall",node.getPosition());
+                else throw new SemanticError("wrong params in methodCall1",node.getPosition());
             }else {
-                if(formParamList==null)throw new SemanticError("wrong params in method Call", node.getPosition());
+
+                //System.out.println(node.getMethodName());
+
+                if(formParamList==null)throw new SemanticError("wrong params in method Call2", node.getPosition());
             }
-            if (formParamList.size()!=realParamList.size())throw new SemanticError("wrong params in methodCall", node.getPosition());
+            if (formParamList.size()!=realParamList.size())throw new SemanticError("wrong params in methodCall3", node.getPosition());
             int i = 0;
             for (var it : realParamList){
                 it.acceptVisitor(this);
                 Type formParamType = formParamList.get(i).b;
-                if (currentExprType.typeName!=formParamType.typeName)throw new SemanticError("wrong params in methodCall",node.getPosition());
+                if (!Objects.equals(currentExprType.typeName, formParamType.typeName))throw new SemanticError("wrong params in methodCall4",node.getPosition());
                 i++;
             }
 
-            currentExprType = funcType;
+            currentExprType = funcType.clone();
             // if(funcType.isId)currentExprType.isAssignAble = true;//todo 什么时候可赋值？
             //else currentExprType.isAssignAble = false;
             currentExprType.isAssignAble = false;
@@ -748,7 +728,7 @@ public class SemanticChecker implements AstVisitor {
         node.setType(type);
     }
 
-    //a[]
+    //a[][].
     @Override
     public void visit(SubScriptExprNode node) {
         node.getIndexNode().acceptVisitor(this);
@@ -842,10 +822,26 @@ public class SemanticChecker implements AstVisitor {
 
         if(varDefNode.hasInit()){
             varDefNode.getInit().acceptVisitor(this);
-            if (!Objects.equals(type.getTypeName(), currentExprType.getTypeName()))throw new SemanticError("wrong init in varDef",node.getPosition());
-            if (type.isArray){
-                if ((!currentExprType.isArray)||currentExprType.numOfArray!=type.numOfArray)throw new SemanticError("wrong init in varDef",node.getPosition());
+
+            if ((!type.isArray)&&(!type.isId)) {//还有assign
+                if (!Objects.equals(type.typeName, currentExprType.typeName))
+                    throw new SemanticError("wrong type in varInit1", node.getPosition());
             }
+            else {
+                if (!Objects.equals(type.typeName, currentExprType.typeName)) {
+                    if (!currentExprType.isNull)
+                        throw new SemanticError("wrong type in varInit2", node.getPosition());
+                }else {
+                   // System.out.println(currentExprType.numOfArray);
+                    if (type.numOfArray!= currentExprType.numOfArray)throw new SemanticError("wrong type in varInit3", node.getPosition());
+                }
+            }
+
+//            if (!Objects.equals(type.getTypeName(), currentExprType.getTypeName()))throw new SemanticError("wrong init in varDef",node.getPosition());
+//            if (type.isArray){
+//                if ((!currentExprType.isArray)||currentExprType.numOfArray!=type.numOfArray)throw new SemanticError("wrong init in varDef",node.getPosition());
+//            }
+
         }
 
     }
