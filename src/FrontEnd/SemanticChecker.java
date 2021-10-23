@@ -195,7 +195,7 @@ public class SemanticChecker implements AstVisitor {
         BinaryExprNode.Op op = node.getOp();
 
         if (op==BinaryExprNode.Op.Equal||op== BinaryExprNode.Op.NotEqual){
-            if (lType.isArray||rType.isArray){
+            if (lType.isArray||lType.isNull||lType.isString||lType.isId){
                 if (!Objects.equals(lType.typeName, rType.typeName)){
                     if ((!lType.isNull)&&(!rType.isNull))throw new SemanticError("wrong binaryExpr", node.getPosition());
                 }else {
@@ -203,6 +203,7 @@ public class SemanticChecker implements AstVisitor {
                 }
             }else {
                 if (!Objects.equals(lType.typeName, rType.typeName))throw new SemanticError("wrong binaryExpr", node.getPosition());
+                if (lType.numOfArray!=rType.numOfArray)throw new SemanticError("wrong binaryExpr", node.getPosition());
             }
             Type type = new Type();
             type.typeName = "bool";
@@ -278,6 +279,7 @@ public class SemanticChecker implements AstVisitor {
         for(var it : node.getStmtNodes()){
             //因为Scope可能会在Stmt中变化，所以之后要重新赋回来
             //或者换一种，引入新的作用域后，出来的时候自动跳出
+            if (it!=null)
             it.acceptVisitor(this);
         }
         currentScope = currentScope.getFatherScope();
@@ -481,12 +483,18 @@ public class SemanticChecker implements AstVisitor {
     @Override
     public void visit(MemberExprNode node) {//a.pig
         ExprNode objExpr = node.getObjExpr();
+
+//        System.out.println(objExpr.getText());
+//        System.out.println(node.getMemberName());
+
         objExpr.acceptVisitor(this);
-        if (currentExprType.isVar&&currentExprType.isId&&(!currentExprType.isArray)){
+//        System.out.println(objExpr.getText());
+//        System.out.println(currentExprType.typeName);
+        if (currentExprType.isId&&(!currentExprType.isArray)){
             String typeName = currentExprType.typeName;
             Type classType = globalScope.getClassType(typeName,false);
             if(!classType.varMembers.containsKey(node.getMemberName()))throw new SemanticError("there isn't this member in the class",node.getPosition());
-            currentExprType = classType.varMembers.get(node.getMemberName());
+            currentExprType = classType.varMembers.get(node.getMemberName()).clone();
             currentExprType.isAssignAble = true;//array算不算assignable?还是说得将她a[2]之后，才assignable
         }else throw new SemanticError("only classVar has member",node.getPosition());
 
@@ -513,7 +521,7 @@ public class SemanticChecker implements AstVisitor {
         if (currentExprType.isString){
             //todo 根据内置函数
             if (!currentExprType.isAssignAble){
-                throw new SemanticError("这样的行为未定义“pig”.la()", node.getPosition());
+                //throw new SemanticError("这样的行为未定义“pig”.la()", node.getPosition());
             }
             Type classType = globalScope.getClassType("string",false);
             if (!classType.funcMembers.containsKey(node.getMethodName()))throw new SemanticError("no this method in string",node.getPosition());
@@ -567,6 +575,7 @@ public class SemanticChecker implements AstVisitor {
             }
 
             currentExprType = funcType.clone();
+            currentExprType.isVar = true;
             // if(funcType.isId)currentExprType.isAssignAble = true;//todo 什么时候可赋值？
             //else currentExprType.isAssignAble = false;
             currentExprType.isAssignAble = false;
@@ -679,13 +688,7 @@ public class SemanticChecker implements AstVisitor {
     @Override
     public void visit(ReturnStmtNode node) {//没有引入新的作用域
 
-        //if (currentScope.inLambda)
-        //System.out.println("nimasile");
-
-        //if (currentScope.contain("c",true))System.out.println("mm");
-
         if (currentScope.inLambda){
-            //Fif (currentScope.contain("c",true))System.out.println("mm");
             if (!node.hasExprNode()){
                 currentLambdaType.isVoid = true;
                 currentLambdaType.typeName = "void";
@@ -707,8 +710,13 @@ public class SemanticChecker implements AstVisitor {
             if(Objects.equals(currentFuncType.typeName, "void"))throw new SemanticError("wrong return type in func",node.getPosition());
             ExprNode exprNode = node.getExprNode();
             exprNode.acceptVisitor(this);
-            if(currentExprType.isNull)throw new SemanticError("can return null",node.getPosition());//todo 我不确定
-            if (!Objects.equals(currentExprType.typeName, currentFuncType.typeName))throw new SemanticError("wrong return type in func",node.getPosition());
+            //if(currentExprType.isNull)throw new SemanticError("can't return null",node.getPosition());//todo 我不确定
+            if (!Objects.equals(currentExprType.typeName, currentFuncType.typeName)) {
+                if (currentFuncType.isArray || currentFuncType.isId || currentFuncType.isString) {
+                    if (!currentExprType.isNull)
+                    throw new SemanticError("wrong return type in func", node.getPosition());
+                }else {throw new SemanticError("wrong return type in func", node.getPosition());}
+            }
             if (currentExprType.numOfArray!=currentFuncType.numOfArray)throw new SemanticError("wrong return dimension of ArrayType",node.getPosition());
         }
     }
@@ -741,8 +749,10 @@ public class SemanticChecker implements AstVisitor {
             node.getExprNode().acceptVisitor(this);
             if (!currentExprType.isArray)throw new SemanticError("only array has subScriptExpr", node.getPosition());
             if (currentExprType.numOfArray<subScriptNum)throw new SemanticError("the num of array can't be less of subScriptNum", node.getPosition());
+            currentExprType = currentExprType.clone();
             currentExprType.numOfArray = currentExprType.numOfArray-subScriptNum;
             currentExprType.isArray = currentExprType.numOfArray!=0;
+            currentExprType.isAssignAble = true;
             subScriptNum = 0;
         }
 
