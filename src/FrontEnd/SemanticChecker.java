@@ -886,6 +886,10 @@ public class SemanticChecker implements AstVisitor {
 
         var formParamList = node.getFormalParas();
         var realParamList = node.getActualParas();
+
+
+       // System.out.println(realParamList.get(0).get);
+
         if (formParamList!=null&&formParamList.size()!=0){
             if (realParamList==null||realParamList.size()==0)throw new SemanticError("wrong param in methodCall 1", node.getPosition());
             if (formParamList.size()!=realParamList.size())throw new SemanticError("wrong param in methodCall 2",node.getPosition());
@@ -893,13 +897,18 @@ public class SemanticChecker implements AstVisitor {
             for (var it : realParamList){
                 VarDefNode formNode = formParamList.get(i);
                 formNode.getTypeNode().acceptVisitor(this);
-                Type formType = currentExprType;
+                Type formType = currentVarType;
 
                 //System.out.println(formNode.getIdentifier());
 
                 currentScope.putVar(formNode.getIdentifier(),formType,formNode.getPosition());
                 it.acceptVisitor(this);
-                if ((!Objects.equals(currentExprType.typeName, formType.typeName))||(formType.numOfArray!=currentExprType.numOfArray))throw new SemanticError("wrong params in methodCall 3",node.getPosition());
+
+//                System.out.println(formNode.getTypeNode().getTypename());
+//                System.out.println(formType.typeName);
+//                System.out.println(currentExprType.typeName);
+
+                if ((!Objects.equals(currentExprType.typeName, formType.typeName))||(formType.numOfArray!=currentExprType.numOfArray))throw new SemanticError("wrong params in methodCall 3erzi",node.getPosition());
                 i++;
             }
         }else{
