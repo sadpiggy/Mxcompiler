@@ -20,7 +20,6 @@ public class Main{
         String name = "testcases/testcase/sema/basic-package/basic-1.mx";
         InputStream input = new FileInputStream(name);
         try {
-
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxstarErrorListener());
@@ -28,25 +27,15 @@ public class Main{
             parser.removeErrorListeners();
             parser.addErrorListener(new MxstarErrorListener());
             ParseTree parseTreeRoot = parser.program();
+
             AstBuilder astBuilder = new AstBuilder();
             ProgramNode astRoot = (ProgramNode) astBuilder.visit(parseTreeRoot);
             GlobalScope globalScope = new GlobalScope(null);
-
-            //System.out.println(astRoot.getProgramSectionNodeList().size());
-
             SymbolCollector symbolCollector = new SymbolCollector(globalScope);
             astRoot.acceptVisitor(symbolCollector);
             SemanticChecker semanticChecker = new SemanticChecker(globalScope);
             astRoot.acceptVisitor(semanticChecker);
-//            System.out.println(globalScope.FuncMembers.size());
-//            System.out.println(globalScope.VarMembers.size());
-//            System.out.println(globalScope.ClassMembers.size());
-            //astRoot.acceptVisitor(new SymbolCollector(globalScope));//加工globalScope
-           // System.out.println(globalScope.FuncMembers.size());
-
-            //System.out.println(astRoot.getPosition().getCol());
         } catch (Errormy er) {
-            //System.out.println("lalalaa");
             System.err.println(er.getString());
             throw new RuntimeException();
         }
