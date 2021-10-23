@@ -28,16 +28,6 @@ public interface MxstarListener extends ParseTreeListener {
 	 */
 	void exitProgram(MxstarParser.ProgramContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxstarParser#mainFn}.
-	 * @param ctx the parse tree
-	 */
-	void enterMainFn(MxstarParser.MainFnContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxstarParser#mainFn}.
-	 * @param ctx the parse tree
-	 */
-	void exitMainFn(MxstarParser.MainFnContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MxstarParser#programSection}.
 	 * @param ctx the parse tree
 	 */
@@ -178,25 +168,25 @@ public interface MxstarListener extends ParseTreeListener {
 	 */
 	void exitInit(MxstarParser.InitContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxstarParser#cond}.
+	 * Enter a parse tree produced by {@link MxstarParser#condition}.
 	 * @param ctx the parse tree
 	 */
-	void enterCond(MxstarParser.CondContext ctx);
+	void enterCondition(MxstarParser.ConditionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MxstarParser#cond}.
+	 * Exit a parse tree produced by {@link MxstarParser#condition}.
 	 * @param ctx the parse tree
 	 */
-	void exitCond(MxstarParser.CondContext ctx);
+	void exitCondition(MxstarParser.ConditionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxstarParser#incr}.
+	 * Enter a parse tree produced by {@link MxstarParser#change}.
 	 * @param ctx the parse tree
 	 */
-	void enterIncr(MxstarParser.IncrContext ctx);
+	void enterChange(MxstarParser.ChangeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MxstarParser#incr}.
+	 * Exit a parse tree produced by {@link MxstarParser#change}.
 	 * @param ctx the parse tree
 	 */
-	void exitIncr(MxstarParser.IncrContext ctx);
+	void exitChange(MxstarParser.ChangeContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code block}
 	 * labeled alternative in {@link MxstarParser#statement}.
@@ -327,6 +317,16 @@ public interface MxstarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionList(MxstarParser.ExpressionListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxstarParser#yuanzi}.
+	 * @param ctx the parse tree
+	 */
+	void enterYuanzi(MxstarParser.YuanziContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxstarParser#yuanzi}.
+	 * @param ctx the parse tree
+	 */
+	void exitYuanzi(MxstarParser.YuanziContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code newExpr}
 	 * labeled alternative in {@link MxstarParser#expression}.

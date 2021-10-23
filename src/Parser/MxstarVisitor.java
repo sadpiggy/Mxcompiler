@@ -23,12 +23,6 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(MxstarParser.ProgramContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxstarParser#mainFn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMainFn(MxstarParser.MainFnContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MxstarParser#programSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -113,17 +107,17 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInit(MxstarParser.InitContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxstarParser#cond}.
+	 * Visit a parse tree produced by {@link MxstarParser#condition}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCond(MxstarParser.CondContext ctx);
+	T visitCondition(MxstarParser.ConditionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxstarParser#incr}.
+	 * Visit a parse tree produced by {@link MxstarParser#change}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIncr(MxstarParser.IncrContext ctx);
+	T visitChange(MxstarParser.ChangeContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code block}
 	 * labeled alternative in {@link MxstarParser#statement}.
@@ -200,6 +194,12 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpressionList(MxstarParser.ExpressionListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxstarParser#yuanzi}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitYuanzi(MxstarParser.YuanziContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code newExpr}
 	 * labeled alternative in {@link MxstarParser#expression}.

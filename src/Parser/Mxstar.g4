@@ -74,7 +74,7 @@ contain
     ;
 
 
-Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//
+Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//[a|b]应该等价于[ab]吧
 Whitespace
     :   [ \t]+
         -> skip
@@ -91,10 +91,16 @@ LineComment
         -> skip
     ;
 
-//非终结词
-program : programSection* mainFn programSection* EOF;
+BlockComment
+    :   '/*' .*? '*/'
+        -> skip
+    ;
 
-mainFn:'int' 'main()' suite;
+
+//非终结词
+program : programSection*  EOF;
+
+//mainFn:'int' 'main()' suite;
 
 programSection:varDef|funcDef|classDef;
 
@@ -116,16 +122,16 @@ param:type Identifier;
 
 suite:'{' statement* '}';
 
-init:expression|(type varDefSection (',' varDefSection)*);
-cond:expression;
-incr:expression;
+init:expression;
+condition:expression;
+change:expression;
 
 statement
     : suite                                                 #block//左递归
     | varDef                                                #vardefStmt
     | If '(' expression ')' trueStmt=statement
         (Else falseStmt=statement)?                         #ifStmt
-    | For '(' init? ';' cond? ';'incr? ')' statement        #forStmt//所以这是不支持for(a=1,b=2;a<=10;a++)的对吧，既然是declaration或者expression
+    | For '(' init? ';' condition? ';'change? ')' statement        #forStmt//所以这是不支持for(a=1,b=2;a<=10;a++)的对吧，既然是expression
     | While '(' expression ')' statement                    #whileStmt
     | Return expression? ';'                                #returnStmt
     | Break ';'                                             #breakStmt
@@ -137,8 +143,9 @@ statement
 
 expressionList: expression (',' expression)*;
 //[&](Parameters) -> {Statements}()
+yuanzi:contain| '(' expression ')' | This| Identifier;
 expression
-    : (contain| '(' expression ')' | This| Identifier)                           #atomExpr
+    : yuanzi                                                                     #atomExpr
     | expression '.' Identifier                                                  #memberExpr
     | expression '.' Identifier '(' expressionList? ')'                          #methodExpr
     | <assoc=right> New creator                                                  #newExpr
@@ -160,7 +167,7 @@ expression
     | <assoc=right> expression '=' expression                                    #assignExpr
     ;
 
-creator
+creator//new int()//我这样无法解决
     : nameType ('[' expression ']')+ ('[' ']')+ ('[' expression ']')+ #errorCreator//errorCreator是干嘛的呢
     | nameType ('[' expression ']')+ ('[' ']')*                       #arrayCreator
     | nameType ('(' ')')?                                             #normalCreator

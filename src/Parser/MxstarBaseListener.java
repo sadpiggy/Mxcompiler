@@ -40,18 +40,6 @@ public class MxstarBaseListener implements MxstarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMainFn(MxstarParser.MainFnContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMainFn(MxstarParser.MainFnContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterProgramSection(MxstarParser.ProgramSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -220,25 +208,25 @@ public class MxstarBaseListener implements MxstarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCond(MxstarParser.CondContext ctx) { }
+	@Override public void enterCondition(MxstarParser.ConditionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCond(MxstarParser.CondContext ctx) { }
+	@Override public void exitCondition(MxstarParser.ConditionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIncr(MxstarParser.IncrContext ctx) { }
+	@Override public void enterChange(MxstarParser.ChangeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIncr(MxstarParser.IncrContext ctx) { }
+	@Override public void exitChange(MxstarParser.ChangeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -371,6 +359,18 @@ public class MxstarBaseListener implements MxstarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpressionList(MxstarParser.ExpressionListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterYuanzi(MxstarParser.YuanziContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitYuanzi(MxstarParser.YuanziContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
