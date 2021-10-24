@@ -19,7 +19,7 @@ public class SemanticChecker implements AstVisitor {
     private Type currentVarType;//用一个string是否能完成任务呢？//干嘛用的10/19号我忘记了
     private Type currentExprType;
     private int subScriptNum;//每次遍历完之后都要更新
-    private Type currentLambdaType;
+   // private Type currentLambdaType;
 
     public SemanticChecker(GlobalScope globalScope_){
         currentScope = globalScope = globalScope_;//symbol collector collect the 顶端作用域
@@ -282,6 +282,7 @@ public class SemanticChecker implements AstVisitor {
             if (it!=null)
             it.acceptVisitor(this);
         }
+        currentScope.getFatherScope().currentLambdaType = currentScope.currentLambdaType.clone();
         currentScope = currentScope.getFatherScope();
     }
 
@@ -703,12 +704,13 @@ public class SemanticChecker implements AstVisitor {
 
         if (currentScope.inLambda){
             if (!node.hasExprNode()){
-                currentLambdaType.isVoid = true;
-                currentLambdaType.typeName = "void";
-                currentLambdaType.isVar = true;
+                currentScope.currentLambdaType.isVoid = true;
+                currentScope.currentLambdaType.typeName = "void";
+                currentScope.currentLambdaType.isVar = true;
             }else {
                 node.getExprNode().acceptVisitor(this);
-                currentLambdaType = currentExprType;
+                currentScope.currentLambdaType = currentExprType;
+                //System.out.println(currentScope.currentLambdaType.typeName);
             }
             return;
         }
@@ -913,16 +915,14 @@ public class SemanticChecker implements AstVisitor {
         Scope lambdaScope = new Scope(currentScope);
         lambdaScope.inLambda = true;
         currentScope = lambdaScope;
-        currentLambdaType = new Type();
-        currentLambdaType.isVar = true;
-        currentLambdaType.isVoid = true;
-        currentLambdaType.typeName = "void";
+//        currentScope.currentLambdaType = new Type();
+//        currentScope.currentLambdaType.isVar = true;
+//        currentScope.currentLambdaType.isVoid = true;
+//        currentScope.currentLambdaType.typeName = "void";
 
         var formParamList = node.getFormalParas();
         var realParamList = node.getActualParas();
 
-
-       // System.out.println(realParamList.get(0).get);
 
         if (formParamList!=null&&formParamList.size()!=0){
             if (realParamList==null||realParamList.size()==0)throw new SemanticError("wrong param in methodCall 1", node.getPosition());
@@ -938,10 +938,6 @@ public class SemanticChecker implements AstVisitor {
                 currentScope.putVar(formNode.getIdentifier(),formType,formNode.getPosition());
                 it.acceptVisitor(this);
 
-//                System.out.println(formNode.getTypeNode().getTypename());
-//                System.out.println(formType.typeName);
-//                System.out.println(currentExprType.typeName);
-
                 if ((!Objects.equals(currentExprType.typeName, formType.typeName))||(formType.numOfArray!=currentExprType.numOfArray))throw new SemanticError("wrong params in methodCall 3erzi",node.getPosition());
                 i++;
             }
@@ -949,14 +945,16 @@ public class SemanticChecker implements AstVisitor {
             if (realParamList!=null&&realParamList.size()!=0)throw new SemanticError("wrong param in methodCall 4",node.getPosition());
         }
 
-
-       // if (currentScope.contain("c",true))System.out.println("made");
-
         if (node.getSuit()!=null)
         node.getSuit().acceptVisitor(this);
 
+        //System.out.println(curr);
+
+        currentExprType = currentScope.currentLambdaType.clone();
         currentScope = currentScope.getFatherScope();
-        currentExprType = currentLambdaType;
+
+
+        //currentExprType = currentLambdaType;
 
     }
 

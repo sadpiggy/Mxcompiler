@@ -25,6 +25,7 @@ public class Scope {//可以把基类转换为非基类吗？？？
     public boolean inFunc;
     public boolean inClass;
     public boolean inLambda;
+    public Type currentLambdaType;
 
     public Scope(Scope fatherScope_){
         fatherScope =fatherScope_;
@@ -36,6 +37,10 @@ public class Scope {//可以把基类转换为非基类吗？？？
         inLoop = false;
         inClass = false;
         inLambda = false;
+        currentLambdaType = new Type();
+        currentLambdaType.isVar = true;
+        currentLambdaType.isVoid = true;
+        currentLambdaType.typeName = "void";
     }
 
     public Scope getFatherScope() {
