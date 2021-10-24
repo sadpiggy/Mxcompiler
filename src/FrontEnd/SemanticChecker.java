@@ -375,7 +375,10 @@ public class SemanticChecker implements AstVisitor {
 
        if (change!=null)change.acceptVisitor(this);
 
+       boolean oldInLoop = currentScope.inLoop;
+       currentScope.inLoop = true;
        node.getStmt().acceptVisitor(this);
+       currentScope.inLoop = oldInLoop;
 
       //  currentScope = currentScope.getFatherScope();
     }
@@ -397,7 +400,16 @@ public class SemanticChecker implements AstVisitor {
             for (var it : node.getParams()){
                 it.acceptVisitor(this);
                 Type formParamType = funcType.params.get(i).b;
-                if ((!Objects.equals(currentExprType.typeName, formParamType.typeName))||currentExprType.numOfArray!= formParamType.numOfArray)throw new SemanticError("wrong type of params in funcCall", node.getPosition());
+                if (formParamType.isArray||formParamType.isId||formParamType.isString){
+                    if(!Objects.equals(currentExprType.typeName, formParamType.typeName)){
+                        if (!Objects.equals(currentExprType.typeName, "null"))throw new SemanticError("wrong type of params in funcCall", node.getPosition());
+                    }else {
+                        if (currentExprType.numOfArray != formParamType.numOfArray)throw new SemanticError("wrong type of params in funcCall", node.getPosition());
+                    }
+                }else {
+                    if ((!Objects.equals(currentExprType.typeName, formParamType.typeName)) || currentExprType.numOfArray != formParamType.numOfArray)
+                        throw new SemanticError("wrong type of params in funcCall", node.getPosition());
+                }
                 i++;
             }
         }
@@ -456,7 +468,7 @@ public class SemanticChecker implements AstVisitor {
     //if(cond)
     @Override
     public void visit(IfStmtNode node) {
-        currentScope.inLoop = true;
+        //currentScope.inLoop = true;
 
         if (node.getConditionExpr()==null)throw new SemanticError("conditionExpr in ifExpr can't be empty", node.getPosition());
         node.getConditionExpr().acceptVisitor(this);
@@ -464,7 +476,7 @@ public class SemanticChecker implements AstVisitor {
         node.getTrueStmt().acceptVisitor(this);
         if (node.getFalseStmt()!=null)node.getFalseStmt().acceptVisitor(this);
 
-        currentScope.inLoop = false;
+       // currentScope.inLoop = false;
 
         //currentScope = currentScope.getFatherScope();
     }
@@ -661,9 +673,10 @@ public class SemanticChecker implements AstVisitor {
                 VarDefNode varDefNode = (VarDefNode) it;
                 visitTypeName(varDefNode.getTypeNode().getTypename(),varDefNode.getPosition(),varDefNode.getTypeNode().getNum());
                 //currentVarType = type;//用于比较init
-                globalScope.putVar(varDefNode.getIdentifier(),currentVarType,varDefNode.getPosition());
+//                globalScope.putVar(varDefNode.getIdentifier(),currentVarType,varDefNode.getPosition());
 
                 varDefNode.acceptVisitor(this);
+                globalScope.putVar(varDefNode.getIdentifier(),currentVarType,varDefNode.getPosition());
             }
 
             if(it instanceof FuncDefNode){//main
@@ -739,7 +752,16 @@ public class SemanticChecker implements AstVisitor {
     //a[][].
     @Override
     public void visit(SubScriptExprNode node) {
-        node.getIndexNode().acceptVisitor(this);
+        if (node.getIndexNode() instanceof SubScriptExprNode) {
+            int oldNum = subScriptNum;
+            subScriptNum = 0;
+            node.getIndexNode().acceptVisitor(this);
+            subScriptNum = oldNum;
+        }else {
+            node.getIndexNode().acceptVisitor(this);
+        }
+
+
         if ((!currentExprType.isInt)||currentExprType.isArray)throw new SemanticError("wrong indexExpr in subScriptExpr",node.getPosition());
         subScriptNum++;
         if (node.getExprNode() instanceof SubScriptExprNode){
@@ -748,7 +770,10 @@ public class SemanticChecker implements AstVisitor {
         else {
             node.getExprNode().acceptVisitor(this);
             if (!currentExprType.isArray)throw new SemanticError("only array has subScriptExpr", node.getPosition());
-            if (currentExprType.numOfArray<subScriptNum)throw new SemanticError("the num of array can't be less of subScriptNum", node.getPosition());
+            if (currentExprType.numOfArray<subScriptNum){
+                //System.out.println(currentExprType.typeName);
+                throw new SemanticError("the num of array can't be less of subScriptNum", node.getPosition());
+            }
             currentExprType = currentExprType.clone();
             currentExprType.numOfArray = currentExprType.numOfArray-subScriptNum;
             currentExprType.isArray = currentExprType.numOfArray!=0;
@@ -808,9 +833,10 @@ public class SemanticChecker implements AstVisitor {
             }
             type.position = varDefNode.getPosition();
             currentVarType = type;//用于比较init
-            currentScope.putVar(varDefNode.getIdentifier(),type, varDefNode.getPosition());
+//            currentScope.putVar(varDefNode.getIdentifier(),type, varDefNode.getPosition());
 
             varDefNode.acceptVisitor(this);
+            currentScope.putVar(varDefNode.getIdentifier(),type, varDefNode.getPosition());
         }
     }
 
@@ -822,6 +848,7 @@ public class SemanticChecker implements AstVisitor {
     //关于typeNode就在外面直接进行了
     //并且currentType已经处理好了
     //int[][] a; a = new int[5][];//type.num = newExpr.num = 括号.num
+    //悲伤 不能这样  因为int x = pig(x);
     @Override//int a = 5;
     public void visit(VarDefNode node) {
         VarDefNode varDefNode = (VarDefNode) node;
@@ -871,12 +898,13 @@ public class SemanticChecker implements AstVisitor {
     //while(){}
     @Override
     public void visit(WhileStmtNode node) {
+        boolean oldInLoop = currentScope.inLoop;
         currentScope.inLoop = true;
         if (node.getConditionExpr()==null)throw new SemanticError("Expr in whileExpr can't be null", node.getPosition());
         node.getConditionExpr().acceptVisitor(this);
         if (currentExprType.isArray||(!currentExprType.isBool))throw new SemanticError("wrong conditionType in whileExpr", node.getPosition());
         node.getStmt().acceptVisitor(this);
-        currentScope.inLoop = false;
+        currentScope.inLoop = oldInLoop;
     }
 
     //fParam suit rParam
