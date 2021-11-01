@@ -49,14 +49,6 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
         for(var it : ctx.funcDef()){
             if(Objects.equals(it.Identifier().getText(), identifier)){
                 throw new SemanticError("wrong class creator",new Position(it.getStart()));
-//                if(hasConstructor){
-//                    throw new SemanticError("Repeated ClassConstructor",new Position(it.getStart()));
-//                }else{
-//                    hasConstructor = true;
-//                    if(it.type()!=null){throw new SemanticError("ClassCreatorHasType",new Position(it.getStart()));}
-//                    if(it.paramList()!=null){throw new SemanticError("ClassCreatorHasParam",new Position(it.getStart()));}
-//                    classConstructor = (FuncDefNode) visit(it);
-//                }
             }else {
                 methods.add((FuncDefNode) visit(it));
             }
@@ -85,13 +77,6 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitFuncDef(MxstarParser.FuncDefContext ctx) {
-
-
-        //System.out.println(ctx.type());
-        //if (ctx.type()==null)System.out.println("cao ni ma de");
-        //else System.out.println("ni ma ");
-
-        //TypeNode typeNode = ctx.type()==null?new VoidTypeNode(new Position(ctx.getStart())):(TypeNode) visit(ctx.type());
         TypeNode typeNode = (TypeNode) visit(ctx.type());
         String identifier = ctx.Identifier().getText();
         ArrayList<VarDefNode>paramList = new ArrayList<>();

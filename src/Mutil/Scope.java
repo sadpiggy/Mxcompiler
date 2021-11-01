@@ -1,15 +1,8 @@
 package Mutil;
 
 import Mutil.error.SemanticError;
-import Mutil.type.ClassType;
-import Mutil.type.FuncType;
 import Mutil.type.Type;
-import Mutil.type.VarType;
 import org.antlr.v4.runtime.misc.Pair;
-import symbol.ClassSymbol;
-import symbol.FuncSymbol;
-import symbol.Symbol;
-import symbol.VarSymbol;
 
 import java.util.HashMap;
 //注意:变量不支持前向引用,但是函数和类支持前向引用

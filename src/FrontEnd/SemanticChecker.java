@@ -1,7 +1,7 @@
 package FrontEnd;
 
 import AST.*;
-import Mutil.GlobalScope;
+//import Mutil.GlobalScope;
 import Mutil.Position;
 import Mutil.Scope;
 import Mutil.error.SemanticError;
@@ -21,7 +21,7 @@ public class SemanticChecker implements AstVisitor {
     private int subScriptNum;//每次遍历完之后都要更新
    // private Type currentLambdaType;
 
-    public SemanticChecker(GlobalScope globalScope_){
+    public SemanticChecker(Scope globalScope_){
         currentScope = globalScope = globalScope_;//symbol collector collect the 顶端作用域
         addStringMethod();
         addBuildInFunc();
@@ -354,13 +354,6 @@ public class SemanticChecker implements AstVisitor {
 
     @Override
     public void visit(ForStmtNode node) {
-        //for()这里不引入作用域，后面才引入//错，就是这里就开始引入新作用域了//错，因为for(laLaLa) "laLaLa"里面没有变量定义，所以它不需要新开一个作用域
-//        Scope forScope = new Scope(currentScope);
-//        forScope.inLoop = currentScope.inLoop;
-//        forScope.inFunc = currentScope.inFunc;
-//        forScope.inClass = currentScope.inClass;
-//        currentScope = forScope;
-
         ExprNode init = node.getInitExpr();
         ExprNode condition = node.getConditionExpr();
         ExprNode change = node.getChangeExpr();
@@ -380,8 +373,6 @@ public class SemanticChecker implements AstVisitor {
        currentScope.inLoop = true;
        node.getStmt().acceptVisitor(this);
        currentScope.inLoop = oldInLoop;
-
-      //  currentScope = currentScope.getFatherScope();
     }
 
     //cook(a,b)
@@ -435,9 +426,6 @@ public class SemanticChecker implements AstVisitor {
 
         if (node.getParamList()!=null){
         for(var it: node.getParamList()){
-//            if(it.getInit()!=null){
-//                throw new SemanticError("param in funcDef can't have init",node.getPosition());
-//            }
 
             visitTypeName(it.getTypeNode().getTypename(),it.getPosition(),it.getTypeNode().getNum());
             //currentFuncType.params.add(new Pair<>(it.getIdentifier(),currentVarType));
@@ -477,9 +465,6 @@ public class SemanticChecker implements AstVisitor {
         node.getTrueStmt().acceptVisitor(this);
         if (node.getFalseStmt()!=null)node.getFalseStmt().acceptVisitor(this);
 
-       // currentScope.inLoop = false;
-
-        //currentScope = currentScope.getFatherScope();
     }
 
     @Override
@@ -496,9 +481,6 @@ public class SemanticChecker implements AstVisitor {
     @Override
     public void visit(MemberExprNode node) {//a.pig
         ExprNode objExpr = node.getObjExpr();
-
-//        System.out.println(objExpr.getText());
-//        System.out.println(node.getMemberName());
 
         objExpr.acceptVisitor(this);
 //        System.out.println(objExpr.getText());
@@ -660,7 +642,7 @@ public class SemanticChecker implements AstVisitor {
 
     //class func var
     @Override
-    public void visit(ProgramNode node) {//先检查是否引用了不存在的东西，再看存在的东西的地址是不是比自己还要靠前//这个思路，不知道对不对
+    public void visit(ProgramNode node) {//先检查是否引用了不存在的东西，再看存在的东西的地址是不是比自己还要靠前//这个思路，不知道对不对//测试点没有我担心的情况，乐:-)
         ArrayList<ProgramSectionNode>ProgramSections = node.getProgramSectionNodeList();
         for(var it : ProgramSections){
             currentScope = globalScope;
@@ -673,8 +655,6 @@ public class SemanticChecker implements AstVisitor {
 
                 VarDefNode varDefNode = (VarDefNode) it;
                 visitTypeName(varDefNode.getTypeNode().getTypename(),varDefNode.getPosition(),varDefNode.getTypeNode().getNum());
-                //currentVarType = type;//用于比较init
-//                globalScope.putVar(varDefNode.getIdentifier(),currentVarType,varDefNode.getPosition());
 
                 varDefNode.acceptVisitor(this);
                 globalScope.putVar(varDefNode.getIdentifier(),currentVarType,varDefNode.getPosition());
@@ -915,10 +895,6 @@ public class SemanticChecker implements AstVisitor {
         Scope lambdaScope = new Scope(currentScope);
         lambdaScope.inLambda = true;
         currentScope = lambdaScope;
-//        currentScope.currentLambdaType = new Type();
-//        currentScope.currentLambdaType.isVar = true;
-//        currentScope.currentLambdaType.isVoid = true;
-//        currentScope.currentLambdaType.typeName = "void";
 
         var formParamList = node.getFormalParas();
         var realParamList = node.getActualParas();
@@ -948,13 +924,8 @@ public class SemanticChecker implements AstVisitor {
         if (node.getSuit()!=null)
         node.getSuit().acceptVisitor(this);
 
-        //System.out.println(curr);
-
         currentExprType = currentScope.currentLambdaType.clone();
         currentScope = currentScope.getFatherScope();
-
-
-        //currentExprType = currentLambdaType;
 
     }
 

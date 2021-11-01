@@ -1,7 +1,7 @@
 package FrontEnd;
 
 import AST.*;
-import Mutil.GlobalScope;
+//import Mutil.GlobalScope;
 import Mutil.Position;
 import Mutil.Scope;
 import Mutil.error.SemanticError;
@@ -17,7 +17,7 @@ public class SymbolCollector implements AstVisitor {
     public Type currentVarType;
     //public Type nowVarType;
 
-    public SymbolCollector(GlobalScope globalScope){
+    public SymbolCollector(Scope globalScope){
         this.globalScope = globalScope;
         addBuildInFunc();
     }

@@ -1,16 +1,10 @@
 package Mutil;
 
 import Mutil.error.SemanticError;
-import Mutil.type.ClassType;
-import Mutil.type.FuncType;
 import Mutil.type.Type;
-import Mutil.type.VarType;
 import org.antlr.v4.runtime.misc.Pair;
-import symbol.Symbol;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class GlobalScope extends Scope{//这个globalScope为什么要和Scope不一样呢,比如取名
     //之后初始化的时候要记得加上一些内置的函数，之后再加 todo

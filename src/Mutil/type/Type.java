@@ -8,13 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 //开始瞎几*乱写了
 public class Type {
-
-   //我很好奇，type里面加一个map是为了什么？套娃吗？
-   //不会是class里面的成员吧？
-   //有道理
-   //class pig:typename"pig"
-   //void dog(){}:typename"void"
-   //int duck:typename"duck"
    public String typeName = "";//typeName是返回值,
    public boolean isClass = false;
    public boolean isFunc = false;
