@@ -19,10 +19,11 @@ public class Scope {//可以把基类转换为非基类吗？？？
     public boolean inClass;
     public boolean inLambda;
     public Type currentLambdaType;
+    //public HashMap<String, register> entities = new HashMap<>();
 
     public Scope(Scope fatherScope_){
         fatherScope =fatherScope_;
-        //尽量做到加进了就初始化，如果没有立即初始化，之后也应该要记得
+        //尽量做到加进了就初始化，如果没有立即初始化，之后也应该要记
         VarMembers = new HashMap<>();
         FuncMembers = new HashMap<>();
         ClassMembers = new HashMap<>();

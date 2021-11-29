@@ -63,7 +63,7 @@ Dot:'.';
 //文档里面Mxstar是没有\r的，对吧？？？？
 fragment ESC//不太明白
     : '\\'[tnr"\\]; //\t \n \" \\等// \r似乎还是得加上不然有些数据跑不了
-StringContain: '"' (ESC|.)*? '"';//中间为什么是三个引号呢
+StringContain: '"' (ESC|.)*? '"';//
 IntContain: [1-9] [0-9]* | '0';
 
 contain
@@ -74,7 +74,7 @@ contain
     ;
 
 
-Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//[a|b]应该等价于[ab]吧
+Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//[a|b]应该等价于[ab]吧  kn
 Whitespace
     :   [ \t]+
         -> skip

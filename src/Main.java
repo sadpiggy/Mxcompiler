@@ -14,13 +14,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.*;
 
-//I should have known, it's better for me to choose to make one smaller and clearer, but even if i don't like my code which is smelled like
-//bullshit. I should not give up my code. I should make him better just like my shit(run :-)
 public class Main{
     public static void main(String[] args) throws Exception{
-        //String name = "testcases/testcase/sema/basic-package/basic-2.mx";
-        //InputStream input = new FileInputStream(name);
-        InputStream input = System.in;
+        String name = "testcases/testcase/sema/basic-package/basic-2.mx";
+        InputStream input = new FileInputStream(name);
+        //InputStream input = System.in;
         try {
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
