@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 //开始瞎几*乱写了
 public class Type {
-   public String typeName = "";//typeName是返回值,
+   public String typeName = "";//typeName是返回值,  int pif(){}|bool pig|class fk{}
    public boolean isClass = false;
    public boolean isFunc = false;
    public boolean isVar = false;

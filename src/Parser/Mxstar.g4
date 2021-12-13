@@ -61,7 +61,7 @@ NotEqual : '!=';
 
 Dot:'.';
 //文档里面Mxstar是没有\r的，对吧？？？？
-fragment ESC//不太明白
+fragment ESC//
     : '\\'[tnr"\\]; //\t \n \" \\等// \r似乎还是得加上不然有些数据跑不了
 StringContain: '"' (ESC|.)*? '"';//
 IntContain: [1-9] [0-9]* | '0';
@@ -74,7 +74,7 @@ contain
     ;
 
 
-Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//[a|b]应该等价于[ab]吧  kn
+Identifier: [a-zA-Z] [a-zA-Z0-9_]*;//if [a-zA-Z][\w]*可否     // ~[1-9]和[~1-9]是一个意思吗 todo//[a|b]应该等价于[ab]吧  kn//不应该写错=成前面那个样子吧
 Whitespace
     :   [ \t]+
         -> skip

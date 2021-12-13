@@ -108,7 +108,6 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
         }else {
             expr = (ExprNode) visit(ctx.expression());
         }
-        //type可能为空,那我要怎么处理呢？
         return new VarDefNode(new Position(ctx.getStart()),null,identifier,expr);
     }
 
