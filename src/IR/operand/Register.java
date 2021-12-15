@@ -12,7 +12,11 @@ public class Register extends Operand{
 
     @Override
     public String toString() {
-        if(name==null)return "";
-        else return "%" + name;
+        StringBuilder stringBuilder = new StringBuilder(type.toString());
+        stringBuilder.append(" ");
+        stringBuilder.append("%" + name);
+        return stringBuilder.toString();
+        //if(name==null)return "";
+        //else return "%" + name;
     }
 }

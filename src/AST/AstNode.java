@@ -1,10 +1,13 @@
 package AST;
 
+import IR.operand.Operand;
+import IR.operand.Register;
 import Mutil.Position;
 import Mutil.Scope;
 
 public abstract class AstNode {
     public Position pos;
+    public Operand operand;
     //public Scope scope;
 
     public AstNode(Position pos_){

@@ -21,7 +21,7 @@ public class LlvmStructType extends LlvmAggregateType{
         return "%struct." + structName;
     }
 
-    public String ClassDefString(){
+    public String toPrintString(){
         StringBuilder stringBuilder = new StringBuilder(this.toString() + " = type {");
         if (!members.isEmpty()) {
             for (int i=0;i<=members.size()-2;i++){

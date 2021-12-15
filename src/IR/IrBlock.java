@@ -31,4 +31,8 @@ public class IrBlock {
         for (var it : insts)System.out.println(insts.toString());
     }
 
+    public int getBlockIndex(){
+        return label.index;
+    }
+
 }

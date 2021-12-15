@@ -10,7 +10,7 @@ public class CallInst extends Inst{
     public IrFunc callee;
     public ArrayList<Operand>params;
 
-    public CallInst(Operand destReg, IrBlock irBlock,IrFunc callee,ArrayList<Operand>params) {
+    public CallInst(Operand destReg, IrBlock irBlock,IrFunc callee,ArrayList<Operand>params) {//null
         super(destReg, irBlock);
         this.callee = callee;
         this.params = params;
