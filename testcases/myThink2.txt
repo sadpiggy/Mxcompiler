@@ -1,0 +1,138 @@
+准备开始ir力
+之前的忘记的差不多了，属于是后爹了讲道理。就很烦。之后写代码一定要写的自己看起来舒服，不然之后再看就太自闭了。这次的cpu属于是我写的自己最能看过去的代码了，但是还不够，所以，加油吧，少年！
+
+//YX
+x = u op v, (op = '+'/'-'/'=='/'!=')
+br u label1, label2
+j label
+ret u
+
+registers, constants, blocks, three kinds of statements
+
+//静下心来，去感受我的压抑与痛苦的来源，不要去试图解决压抑与痛苦，而是去对抗它们的来源。把之前我给自己的标签忘记掉吧。
+##日志
+12/1 : 去搞清楚我到底需要干嘛
+IR应该是AST用来和汇编转换的桥梁，我的AST应该是没有太大的致命错误和缺陷的，然后由于我还需要让我的汇编代码更加优化，所以IR也有要求，所以我应该先
+对汇编有个大概的了解，然后看看别人的好的IR，比如llvm ir,然后再写，进而直接codegen与optimise
+试图了解汇编失败
+//记得我还有科学计算作业还有毛概ppt修改
+
+12/2
+还是不知道要干什么，痳了属于是，看会儿编译原理吧
+##我愿意去相信世界的本质是简单的，所以，从IR开始，我要好好写一个逻辑清晰而又简单的程序，之前的屎山，正确性应该是对的，那么就不管了，之后的，一定要好好写
+要实现短路求值的话，是不是布尔表达式要化成好几个基本块 //先不实现短路求值//因为他的逻辑不够简明
+//还是得用label而不是每条指令前面都放一个数字，因为可能代码优化会改变指令的顺序
+
+12/3
+学习不要太功利，感兴趣的就多学学，不要急躁相信水到渠成的力量。
+//其实我的ddl也不算太紧啦，就三个pre加上大作业而已嘛，数学也"没有多少嘛"。
+
+12/4
+我是FW,已经完全学不会了，烦死了，艹。
+不要自找苦吃，一步一步来，不可能一步登天
+
+12/5
+决定重构代码了，一步一步来，每一步都可以学到新东西的，不要太焦虑，认清差距就好了
+
+12/8
+摸了几天鱼
+似乎可以链接C++的库？吗
+12/9先写吧
+很痛苦，我想要改变，但是我的生活总是不按我的预期出牌，我感觉我对自己越来越失望了，我害怕，我快要与自己决裂了，我裂开了
+//注意之前的设计中，构造函数type为void
+//尽量减少冗余，不然很难受
+我该怎么设计我的irType使得既能
+12/10
+先让 print10能跑起来，然后"hello world",然后class,然后寄存器分配，汇编生成
+align到底是什么，按照上面来对齐，对齐的又是什么
+12/11
+regfile的类型到指令里面再分配//好像不太行
+注意之前varDefNode被拆开过了
+数组怎么处理呢？malloc吧
+12/15
+for 里面的int a;要记得处理。
+
+任何一个全局变量都是一个指针，然后可能有value；//int a; a是指针i32*，指向一个值
+
+基本架构设计:
+需要一个装载inst的数组，里面装着指令；需要一个符号表，里面装着变量和类型的信息，包括地址，大小，值？
+typeTable instTable labelTable
+短路求值用于布尔表达式，用基本块之间的跳转来拆开布尔表达式（这样的开销不应该更大吗？）
+//注意是32位机
+
+##汇编前的指令集,引自BoHan Hou//++ -- 可以被拆开
+//phi可以先不实现
+Instruction Set
+You can guess the meaning from their names. All register except %dest and %reg* can be replaced by immediate number. %reg* can also be replaced by undef.
+
+Jump Instruction:
+    ret %src
+    jump target
+    br %cond ifTrue ifFalse
+
+Memory Access Instruction:
+    store %src %dest        // M[%dest] <- %src
+    %dest = load %addr      // %dest <- M[%addr] (I believe simplicity favours regularity)
+    %dest = alloc %size     // Allocate %size byte memory in heap space and return top base
+
+Function Call Instruction:
+    call funcname %op1 %op2 %op3 ...
+    %dest = call funcname %op1 %op2 %op3 ...
+
+Register Transfer Instruction:
+    %dest = move %src
+
+Phi Instruction:
+    %dest = phi block1 %reg1 block2 %reg2 ...
+
+Binary Instruction:
+Arithmetic:
+    %dest = add %src1 %src2
+    %dest = sub %src1 %src2
+    %dest = mul %src1 %src2
+    %dest = div %src1 %src2
+    %dest = mod %src1 %src2
+    %dest = shl %src1 %src2
+    %dest = shr %src1 %src2
+    %dest = and %src1 %src2
+    %dest = or  %src1 %src2
+    %dest = xor %src1 %src2
+Logical:
+    %dest = slt %src1 %src2
+    %dest = sle %src1 %src2
+    %dest = seq %src1 %src2
+    %dest = sne %src1 %src2
+    %dest = sge %src1 %src2
+    %dest = sgt %src1 %src2
+
+Unary Instruction:
+    %dest = neg %src
+    %dest = not %src
+
+
+
+//尽量用递归，不要再让代码变的又臭又长了
+@Override
+public void visit(cmpExprNode it) {
+	it.lhs.accept(this);
+	it.rhs.accept(this);
+	register value = new register();
+	binary.opType op = it.opCode == cmpExprNode.cmpOpType.eq ? eq : ne;
+	currentBlock.push_back(new binary(value, it.lhs.val, it.rhs.val, op));
+	it.val = value;
+}
+
+@Override
+public void visit(varExprNode it) {
+	it.val = currentScope.getEntity(it.name, true);
+}
+//主体流程
+            new SemanticChecker(gScope).visit(ASTRoot);
+
+            mainFn f = new mainFn();
+            new IRBuilder(f, gScope).visit(ASTRoot);
+            // new IRPrinter(System.out).visitFn(f);
+            AsmFn asmF = new AsmFn();
+            new InstSelector(asmF).visitFn(f);
+            new RegAlloc(asmF).work();
+            new AsmPrinter(asmF, System.out).print();

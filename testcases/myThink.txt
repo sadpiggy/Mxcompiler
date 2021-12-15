@@ -1,0 +1,158 @@
+作用域问题: 首先，变量不支持前向引用（并未明确说明是否函数和class也不支持前向引用（支持））
+          不知道是否能否完全看到上层作用域
+          顶层作用域不知道是否也是不支持前向引用
+
+          #函数和类的声明都应该在顶层，作用域为全局，支持前向引用（forward reference）。
+          也就是说，函数和类支持前向引用，变量不支持，所以，预处理时，函数和类需要two pass.第一趟的时候，都跑，但是只有变量要判定undefined的错误，函数和类第二趟再判定
+          第二趟或许可以在checker里面进行
+          //scope 除了 global应该都可以算是一次性的，而type是多次性的
+
+
+
+一个大问题：语义分析是否影响后面的ir生成
+          应该是影响的，比如符号表，但是我有一个问题，那就是符号表里面需要保存什么东西来让ir使用呢？
+
+
+
+
+数组创建    bool[] pig;访问pig下标是未定义的
+          静态创建数组,int[] dog[10];默认值是null，访问下标是未定义的。那他还可以再创建一次吗？比如dog = new int[10]?(猜测不行，已经创建过了)
+
+
+变量创建    int a; int b = a + 1;这样是不是不行啊
+
+          是不是所有的varlist都被转换成varnode了？如果是，是怎么转换的？太黑箱了
+
+
+          type var\class\func标志本身是什么，typename标志返回值(class 例外，就是自己的名字).后面的var专用，标志细化的本身是什么
+
+
+          为了简化，Expressions和Statements默认可以访问顶层域的所有对象。
+          开始迷惑起来 int a =(b + 1); b = 1;
+          这个语句,(b+1)是一个expression,那么b就是后面那个b，这不就违反前向引用了吗
+
+          #10/16 将astNode 里的scope删除,若之后还有用,再重新加上
+
+          ArrayTypeNode的name应该不包含[],方便处理
+
+          //varDef只在 program class func中，然后
+
+          没有赋初值的变量的访问似乎是未定义的(所以我应该不需要判断是否已经赋过值的对吧？) todo 未定义
+
+          //还有,globalScope的设定似乎是冗余的
+
+          scope退出的时候要记得将scope设置为他的父亲scope
+
+          例如：bool[] flag; 是一句合法声明语句，不加创建的数组在创建后对应变量值为null，此时访问数组下标是未定义的。
+          null?需要赋值为null吗？
+          class之类的可以赋值为null吗？
+
+          对没有赋值的变量的引用，是未定义的还是非法的啊？
+          //应该是语法正确的
+
+          node.setType()不知道是不是必需的
+
+
+          至于AstBuilder为什么可以跑出来Node,我还是不清楚，太黑箱了
+
+          //visitExpressionList写的啥玩意儿？当时喝醉了？
+          //想起来了，之所以转换成funcCall,是因为只有funcCall（realParamList）会用到这个东西，然后转换成funcCall再转换成ParamList
+          //因为我没有写realParamListNode或者exprListNode之类的东西，所以返回不了一个实际参数列表，就得借助其他Node
+
+          之后记得把isAssignable补上，很多地方没有做处理
+
+          type里的class是指这个声明的类本身，实例化的东西叫做var,isId = true;
+
+          内建函数
+          字符串内建方法        //常量字符串使用它未定义
+          数组内建方法 .size() //null 使用它未定义
+
+          #对于类成员不论是方法还是变量，都可以用对象标识符.取对象，对于除了字符串string的基本类型int, bool返回一个实值，剩下返回的应当是一个引用。
+          //这个玩意是什么意思，我怎么表示引用啊 =.=
+
+          //method不能调用构造函数，这个要注意
+          //函数返回值什么时候是assignAble的呢？
+
+          //今晚如果有时间，可以把封装弄一下，太ugly了。并且可以规范一下我的程序的一致性，不然太ugly了
+          //已做
+
+          //int a = new a;可以吗？
+          //pig a = null;可以吗？
+
+          //int[][] a;
+          //a = new int[5][];
+          //a[2] = new int[5];
+          //a[2] = new int[]//这个直接出不来parser
+
+
+          #而静态创建数组（形如：<typename>[] <identifier>[arraySize]定义数组）后默认值是Null，此时使用数组下标访问元素是未定义的。
+          //暂不支持，之后如果真的需要，就将它实现
+
+          //type我新加的isNew不知道有用没
+          //已删
+
+          //之前的isArray现在看来也已经没有什么用了，可以删去了，之后可以考虑一手
+
+          bool array class 只能== !=
+          //bool 应该支持|| &&吧
+          //其中，class只能用于比较地址，但是，null也算是地址吗？没赋值的对象好像不能使用
+
+          string + < <= > >=  == !=
+
+          我把constructor的类型置为void了
+
+          //inFunc细想其实没有必要，因为Stmt一定在func里面。所以下面那句话是想表达什么呢
+          #return只在函数中有效，不在函数中的return视为语法错误。 break, continue只在循环中有效，不在循环中的break, continue视为语法错误。
+
+
+          for(...){}//...里面没有新的变量的定义，所以他的作用域应该是上层的作用域，然后{}里面有变量的定义，所以是一个新的作用域，那么有个问题
+                    //{}里面可以有一个变量定义使其覆盖...里面的某个值吗？在c+++里面不行。
+                    //所以如果我之前的想法没错,...里面不能定义变量，那么，Mx和C++的for的作用域从本质上就是不同的.......对吗？
+
+          //isVar isClass isFunc 之后可以取消掉，因为他们存在不同的地方，井水不犯河水
+
+          //visit for,即使不是suit，也要弄成suit
+
+          astBuilder 67  52
+
+          func的 param可能为空,type不会为空,因为g4里面写的明明白白,(有问号的才会为空)
+
+          //使用laLaLa.getType()时，如果不是有需要要改变它的值的话，要使用clone，不然以为java是引用，所以会导致一些我不意料改变的值被改变。
+
+          10/23
+          我发现，在写程序的时候，我需要一个约束自己代码风格的一致性文件，不然会很错乱。
+          //我好像忘记支持静态数组创建了诶=.=
+
+          //array 可以赋值为null
+
+          lambda的作用域问题我没太弄得秦楚
+
+          函数没有返回值也是错好像是
+
+          11/1
+
+                                               IR
+          We first define classes for IR grammars: registers, constants, blocks, three kinds of statements. Labels can be represented by blocks.
+          只能说完全搞不懂这是拿来干嘛的
+
+          龙叔上说，维护一个符号表，在一个块推出的时候，要记住撤回一些修改，所以可以再维护一个栈来进行跟踪。
+          我的设计 目前来看不需要维护
+
+          一个函数没有return 我没有解决 但是没测试到
+
+          while(true){}
+          这是进入while就开始一个新的作用域，还是进入了block之后才开始新的作用域呢
+          前者我不方便实现，但好像后者会有一些局限性？
+
+          int x;
+          这个用什么指令来表示
+
+          x = y op z
+          x = y
+          x = y[z]
+          x[z] = y
+          if true x goto tag
+          if false x goto tag
+
+
+

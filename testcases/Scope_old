@@ -1,0 +1,103 @@
+package Mutil;
+
+import Mutil.error.SemanticError;
+import Mutil.type.ClassType;
+import Mutil.type.FuncType;
+import Mutil.type.Type;
+import Mutil.type.VarType;
+import symbol.ClassSymbol;
+import symbol.FuncSymbol;
+import symbol.Symbol;
+import symbol.VarSymbol;
+
+import java.util.HashMap;
+//注意:变量不支持前向引用,但是函数和类支持前向引用
+//变量与函数之间允许重名，其他都不允许
+public class Scope {//可以把基类转换为非基类吗？？？
+    private HashMap<String, VarType>VarMembers;
+    private HashMap<String, FuncType>FuncMembers;
+    private HashMap<String, ClassType>ClassMembers;
+    private Scope fatherScope;
+
+    public Scope(Scope fatherScope_){
+        fatherScope =fatherScope_;
+        VarMembers = new HashMap<>();
+        FuncMembers = new HashMap<>();
+        ClassMembers = new HashMap<>();
+    }
+
+    public Scope getFatherScope() {
+        return fatherScope;
+    }
+
+    public void put(String name,Type t,Position pos){
+        if (t instanceof VarType){
+            putVar(name, (VarType) t,pos);
+            return;
+        }
+        if (t instanceof FuncType){
+            putFunc(name, (FuncType) t,pos);
+            return;
+        }
+        putClass(name,(ClassType) t,pos);
+
+    }
+
+    public void putVar(String name,VarType t,Position pos){
+        if (VarMembers.containsKey(name)||ClassMembers.containsKey(name)){throw new SemanticError("variable redefine",pos);}
+        VarMembers.put(name,t);
+    }
+
+    public void putClass(String name,ClassType t,Position pos){
+        if (ClassMembers.containsKey(name)||VarMembers.containsKey(name)||FuncMembers.containsKey(name))throw new SemanticError("class redefine",pos);
+        ClassMembers.put(name,t);
+    }
+
+    public void putFunc(String name,FuncType t,Position pos){
+        if (FuncMembers.containsKey(name)||ClassMembers.containsKey(name))throw new SemanticError("func redefine",pos);
+        FuncMembers.put(name,t);
+    }
+
+    //要不要写个整体的contain之类的？
+    public boolean containVar(String name, boolean lookUpon) {
+        if (VarMembers.containsKey(name)) return true;
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.containVar(name, true);
+        else return false;
+    }
+
+    public boolean containFunc(String name, boolean lookUpon) {
+        if (FuncMembers.containsKey(name)) return true;
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.containFunc(name, true);
+        else return false;
+    }
+
+    public boolean containClass(String name, boolean lookUpon) {
+        if (ClassMembers.containsKey(name)) return true;
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.containClass(name, true);
+        else return false;
+    }
+
+    public VarType getVarType(String name, boolean lookUpon) {
+        if (VarMembers.containsKey(name)) return VarMembers.get(name);
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.getVarType(name, true);
+        return null;
+    }
+
+    public FuncType getFuncType(String name, boolean lookUpon) {
+        if (FuncMembers.containsKey(name)) return FuncMembers.get(name);
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.getFuncType(name, true);
+        return null;
+    }
+
+    public ClassType getClassType(String name, boolean lookUpon) {
+        if (ClassMembers.containsKey(name)) return ClassMembers.get(name);
+        else if (fatherScope != null && lookUpon)
+            return fatherScope.getClassType(name, true);
+        return null;
+    }
+}

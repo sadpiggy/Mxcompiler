@@ -1,0 +1,58 @@
+package Mutil;
+
+import Mutil.error.SemanticError;
+import Mutil.type.ClassType;
+import Mutil.type.FuncType;
+import Mutil.type.Type;
+import Mutil.type.VarType;
+import symbol.Symbol;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class GlobalScope extends Scope{
+    private HashMap<String, VarType> VarTypes = new HashMap<>();
+    private HashMap<String, FuncType> FuncTypes = new HashMap<>();
+    private HashMap<String, ClassType> ClassTypes = new HashMap<>();
+
+    public GlobalScope(Scope fatherScope_) {
+        super(fatherScope_);
+    }
+
+    public void addVarType(String name, VarType t, Position pos) {
+        if (VarTypes.containsKey(name)||ClassTypes.containsKey(name))
+            throw new SemanticError("multiple definition of " + name, pos);
+        VarTypes.put(name, t);
+    }
+
+    public void addFuncType(String name, FuncType t, Position pos) {
+        if (FuncTypes.containsKey(name)||ClassTypes.containsKey(name))
+            throw new SemanticError("multiple definition of " + name, pos);
+        FuncTypes.put(name, t);
+    }
+
+    public void addClassType(String name, ClassType t, Position pos) {
+        if (ClassTypes.containsKey(name)||FuncTypes.containsKey(name)||VarTypes.containsKey(name))
+            throw new SemanticError("multiple definition of " + name, pos);
+        ClassTypes.put(name, t);
+    }
+
+    public VarType getVarTypeFromName(String name, Position pos) {//小心null 我也是迫不得已
+        if (VarTypes.containsKey(name)) return VarTypes.get(name);
+        //throw new SemanticError("no such type: " + name, pos);
+        return null;
+    }
+
+    public FuncType getFuncTypeFromName(String name, Position pos) {//小心null 我也是迫不得已
+        if (FuncTypes.containsKey(name)) return FuncTypes.get(name);
+        //throw new SemanticError("no such type: " + name, pos);
+        return null;
+    }
+
+    public ClassType getClassTypeFromName(String name, Position pos) {//小心null 我也是迫不得已
+        if (ClassTypes.containsKey(name)) return ClassTypes.get(name);
+        //throw new SemanticError("no such type: " + name, pos);
+        return null;
+    }
+}
