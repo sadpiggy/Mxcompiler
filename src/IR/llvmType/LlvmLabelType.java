@@ -1,9 +1,9 @@
 package IR.llvmType;
 
 public class LlvmLabelType extends LlvmFirstClassType{
-    public int index;
+    public String index;
 
-    public LlvmLabelType(int index){
+    public LlvmLabelType(String index){
         this.index = index;
     }
 

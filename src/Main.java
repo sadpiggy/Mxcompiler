@@ -3,6 +3,7 @@ import AST.ProgramNode;
 import FrontEnd.SemanticChecker;
 import FrontEnd.SymbolCollector;
 //import Mutil.GlobalScope;
+import IR.IrFirstPass;
 import Mutil.MxstarErrorListener;
 import Mutil.Scope;
 import Mutil.error.Errormy;
@@ -16,7 +17,7 @@ import java.io.*;
 
 public class Main{
     public static void main(String[] args) throws Exception{
-        String name = "testcases/testcase/sema/basic-package/basic-2.mx";
+        String name = "testcases/testcase/myTest.mx";
         InputStream input = new FileInputStream(name);
         //InputStream input = System.in;
         try {
@@ -36,7 +37,12 @@ public class Main{
             SymbolCollector symbolCollector = new SymbolCollector(globalScope);
             astRoot.acceptVisitor(symbolCollector);
             SemanticChecker semanticChecker = new SemanticChecker(globalScope);
-            astRoot.acceptVisitor(semanticChecker);
+           // astRoot.acceptVisitor(semanticChecker);
+
+            //ir
+            IrFirstPass irFirstPass = new IrFirstPass();
+            irFirstPass.run(astRoot);
+            irFirstPass.printIr();
             //IR builder  //我可能还要一个pass,来收集type
         } catch (Errormy er) {
             System.err.println(er.getString());

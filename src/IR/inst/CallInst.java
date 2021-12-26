@@ -25,7 +25,7 @@ public class CallInst extends Inst{
     @Override
     public String toString() {
         String ret = "";
-        if (this.destReg.toString() != null) ret += this.destReg.toString() + " = ";
+        if (this.destReg != null) ret += this.destReg.toString() + " = ";
         ret += "call " + callee.toString(params);
         return ret;
     }

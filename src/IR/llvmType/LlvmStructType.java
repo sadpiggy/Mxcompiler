@@ -1,18 +1,25 @@
 package IR.llvmType;
 
+import IR.operand.Operand;
+
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class LlvmStructType extends LlvmAggregateType{
-    public ArrayList<LlvmSingleValueType>members;
+    public ArrayList<LlvmSingleValueType>members = new ArrayList<>();
+    public ArrayList<String>memberNames = new ArrayList<>();
+    public ArrayList<Integer>memberSize = new ArrayList<>();
     public String structName;
-    public int size;
+    public int size = 0;
 
     public LlvmStructType(String structName){
         this.structName = structName;
     }
 
-    public void addMember(LlvmSingleValueType member){
+    public void addMember(String memberName,LlvmSingleValueType member){
         members.add(member);
+        memberNames.add(memberName);
+        memberSize.add(member.getSize());
         size+=member.getSize();
     }
 
@@ -36,5 +43,29 @@ public class LlvmStructType extends LlvmAggregateType{
     @Override
     public int getSize() {
         return size;
+    }
+
+    public int getIndex(String memberName){
+        for(int i=0;i<memberNames.size();i++){
+            if (Objects.equals(memberName, memberNames.get(i)))return i;
+        }
+       // System.out.println("llStruct 50");
+        return 0;
+    }
+
+    public boolean containMember(String memberName){
+        for (String name : memberNames) {
+            if (Objects.equals(memberName, name)) return true;
+        }
+        return false;
+    }
+
+    public LlvmSingleValueType getMemberType(String memberName){
+        for(int i=0;i<memberNames.size();i++){
+            if (Objects.equals(memberName, memberNames.get(i)))return members.get(i);
+        }
+        return null;
+        //System.out.println("llStruct 50");
+        //return 0;
     }
 }

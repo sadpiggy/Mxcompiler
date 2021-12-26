@@ -3,6 +3,7 @@ package IR.operand;
 import IR.llvmType.LlvmFirstClassType;
 import IR.llvmType.LlvmPointerType;
 import IR.llvmType.LlvmSingleValueType;
+import IR.llvmType.LlvmStructType;
 
 public class GlobalOperand extends Operand{
     public String name;
@@ -12,18 +13,22 @@ public class GlobalOperand extends Operand{
    // boolean isConst;
    // boolean isConstString;
 
-    public GlobalOperand(LlvmFirstClassType type,String name,String value,boolean isString) {
+    public GlobalOperand(LlvmFirstClassType type,String name,String value) {
         super(new LlvmPointerType(type));
         this.name = name;
         this.value = value;//String 的value为 string const的一串编号
        // this.isString = isString;
-        if (type.getSize()==1||type.getSize()==8){
-            alignSize = 1;
-        }else if (type.getSize()==32){
-            alignSize = 4;
-        }else{
-            alignSize = 8;
-        }
+       if (type instanceof LlvmStructType){
+           alignSize = 8;
+       }else {
+           if (type.getSize()==1||type.getSize()==8){
+               alignSize = 1;
+           }else if (type.getSize()==32){
+               alignSize = 4;
+           }else{
+               alignSize = 8;
+           }
+       }
        // this.isConst = isConst;
        // this.isConstString = isString;
     }

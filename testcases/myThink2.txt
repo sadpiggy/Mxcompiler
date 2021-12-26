@@ -51,6 +51,23 @@ regfile的类型到指令里面再分配//好像不太行
 数组怎么处理呢？malloc吧
 12/15
 for 里面的int a;要记得处理。
+12/16
+数组不要弄成结构体，因为这样就要弄两个struct,当成一个指针，然后在前面一块放size;
+同理，string也可以这样弄
+a = new char[10];*a为int,然后十个bool放在后面
+在顶层作用域，我无法处理 int a = b + c;
+12/17
+由浅入深，一步一步写，不要想着一次性写完美，不然太难了，大不了重头再来
+12/18命名规范
+%parampig
+%pig
+%m5
+12/23
+isLeft那里应该是处理错了
+12/24记得处理global int* a = new int[10]
+准备添加class支持
+12/25
+global int*a = new int[10]还没支持
 
 任何一个全局变量都是一个指针，然后可能有value；//int a; a是指针i32*，指向一个值
 
@@ -136,3 +153,5 @@ public void visit(varExprNode it) {
             new InstSelector(asmF).visitFn(f);
             new RegAlloc(asmF).work();
             new AsmPrinter(asmF, System.out).print();
+
+

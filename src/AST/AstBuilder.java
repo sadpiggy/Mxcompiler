@@ -54,11 +54,19 @@ public class AstBuilder extends MxstarBaseVisitor<AstNode> {
             }
         }
 
+        Position pos =  new Position(ctx.getStart());
+
         if (ctx.classCreatorFuncDef()!=null){
             if (!Objects.equals(ctx.classCreatorFuncDef().Identifier().getText(), identifier))
                 throw new SemanticError("wrong classCreator",new Position(ctx.getStart()));
             methods.add((FuncDefNode) visit(ctx.classCreatorFuncDef()));//?????todo
-        }
+        }else methods.add(new FuncDefNode(
+                pos,
+                identifier,
+                new VoidTypeNode(pos),
+                null,
+                new BlockStmtNode(pos,new LinkedList<>())
+        ));
 
         return new ClassDefNode(new Position(ctx.getStart()),identifier,methods,members,classConstructor);
     }

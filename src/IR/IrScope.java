@@ -6,7 +6,7 @@ import IR.operand.Register;
 import java.util.HashMap;
 
 public class IrScope {//不要束缚我自己了，我受够了
-    public HashMap<String, Operand>vars;//name=name+block_name
+    public HashMap<String, Operand>vars;//name=name+block_name//不需要，用astnode就够了
     public IrScope fatherScope;
     public IrScope(){
         vars = new HashMap<>();fatherScope = null;

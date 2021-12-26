@@ -14,6 +14,6 @@ public class LlvmPointerType extends LlvmSingleValueType{
 
     @Override
     public int getSize() {
-        return 32;
+        return 8;
     }
 }

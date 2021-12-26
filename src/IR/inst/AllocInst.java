@@ -10,8 +10,9 @@ public class AllocInst extends Inst{
     public LlvmSingleValueType type;
     public int alignSize;
 
-    public AllocInst(Operand destReg, IrBlock irBlock,LlvmSingleValueType type) {
+    public AllocInst(LlvmSingleValueType type,Operand destReg, IrBlock irBlock) {
         super(destReg, irBlock);
+        //this.type = type;
         this.type = type;
         if (this.type instanceof LlvmPointerType){
             alignSize = 8;
