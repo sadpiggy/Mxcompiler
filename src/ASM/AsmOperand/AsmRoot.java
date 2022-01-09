@@ -5,10 +5,7 @@ import ASM.AsmFunc;
 import ASM.ConflictAnalise;
 import ASM.RegisterAlloc;
 
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 
 public class AsmRoot {
@@ -42,7 +39,7 @@ public class AsmRoot {
         asmFuncs.add(func);
     }
 
-    public void printAsm() throws FileNotFoundException {
+    public void printAsm(PrintStream printStream) throws FileNotFoundException {
 
 //        for (var it : asmFuncs){
 //            System.out.println(it.blocks.size());
@@ -51,13 +48,14 @@ public class AsmRoot {
 //        System.setOut(new PrintStream(new BufferedOutputStream(
 //                new FileOutputStream("ravel/build/test.s")),true));
 
-        System.out.println(
+
+        printStream.println(
                 ".text\n" +
                         "\t.file\t\"pig.c\""
         );
         for (var it : asmFuncs)it.printAsm();
 
-       System.out.println(".type\t.L.str,@object          # @.str\n" +
+       printStream.println(".type\t.L.str,@object          # @.str\n" +
                "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
                ".L.str:\n" +
                "\t.asciz\t\"%s\"\n" +
@@ -78,8 +76,8 @@ public class AsmRoot {
                "\t.asciz\t\"%d\\n\"\n" +
                "\t.size\t.L.str.3, 4");
 
-        for (var it : asmGlobalValues){System.out.println(it.toString()+"\n");}
-        System.out.println(".ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
+        for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
+        printStream.println(".ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
                 "\t.section\t\".note.GNU-stack\",\"\",@progbits\n");
     }
 

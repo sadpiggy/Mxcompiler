@@ -58,7 +58,9 @@ public class Main{
 //           // System.out.println("skdf");
                 instSelector.run();
                 asmRoot.regsAlloc();
-                asmRoot.printAsm();
+                System.setOut(new PrintStream(new BufferedOutputStream(
+                new FileOutputStream("output.s")),true));
+                asmRoot.printAsm(System.out);
             }
            // irFirstPass.printIr();
         } catch (Errormy er) {
