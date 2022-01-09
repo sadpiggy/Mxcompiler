@@ -24,10 +24,11 @@ public class Main{
     public static void main(String[] args) throws Exception{
         boolean semanticOnly = args.length > 0 && args[0].equals("--semantic_only");
         String name = "testcases/testcase/myTest.mx";
-       // InputStream input = new FileInputStream(name);
+        //InputStream input = new FileInputStream(name);
         InputStream input = System.in;
         try {
             //生成具体语法树
+            // = true;
 
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
@@ -45,7 +46,7 @@ public class Main{
             astRoot.acceptVisitor(symbolCollector);
             SemanticChecker semanticChecker = new SemanticChecker(globalScope);
 
-           // astRoot.acceptVisitor(semanticChecker);
+            astRoot.acceptVisitor(semanticChecker);
 
             if (!semanticOnly){
                 //ir
