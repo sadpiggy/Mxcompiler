@@ -9,6 +9,6 @@ public class RetInst extends asmInst{
 
     @Override
     public String toString() {
-        return "ret";
+        return "\t" + "ret";
     }
 }

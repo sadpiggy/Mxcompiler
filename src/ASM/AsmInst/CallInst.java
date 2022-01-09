@@ -13,6 +13,6 @@ public class CallInst extends asmInst{
 
     @Override
     public String toString() {
-        return "call " + callFunc;
+        return "\t" + "call " + callFunc;
     }
 }

@@ -162,7 +162,7 @@ public class InstSelector {//构造函数那里有bug
 
 //        currentAsmBlock = currentAsmFunc.blocks.get(currentAsmFunc.blocks.size()-1);
 //        currentAsmBlock.insts.removeLast();
-        currentAsmBlock.push_back(new JInst(currentAsmBlock, tailBlock.name));
+  //      currentAsmBlock.push_back(new JInst(currentAsmBlock, tailBlock.name));
         currentAsmBlock = tailBlock;
         //返回值这里可能要处理一下
         //currentAsmBlock.push_back(new MoveInst(currentAsmBlock,a0,zero));
@@ -346,7 +346,7 @@ public class InstSelector {//构造函数那里有bug
             currentAsmBlock.push_back(new MoveInst(currentAsmBlock,a0,value));
         }
         //currentAsmBlock.push_back(new ASM.AsmInst.RetInst(currentAsmBlock));
-        currentAsmBlock.push_back(new JInst(currentAsmBlock, tailBlock.name));
+        currentAsmBlock.push_back(new JInst(currentAsmBlock, ".L"+tailBlock.name));
     }
 
     public void visitSextInst(SextInst inst) {

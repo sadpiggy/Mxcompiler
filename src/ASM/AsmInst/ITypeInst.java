@@ -28,14 +28,14 @@ public class ITypeInst extends asmInst{
 
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
-           stringBuilder.append("lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
+           stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
            rs1 = t1;
         }
         if (rd.isAddress){
-            stringBuilder.append(op + " " + t0 + ", " + rs1 + ", " + imm + "\n");
-            stringBuilder.append("sw " + t0 + ", " + rd.toString() + "(s0)");
+            stringBuilder.append("\t" + op + " " + t0 + ", " + rs1 + ", " + imm + "\n");
+            stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)" );
             return stringBuilder.toString();
         }
-        return op + " " + rd + ", " + rs1 + ", " + imm;
+        return stringBuilder.append("\t" + op + " " + rd + ", " + rs1 + ", " + imm).toString();
     }
 }

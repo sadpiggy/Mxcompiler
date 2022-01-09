@@ -23,10 +23,10 @@ public class BrInst extends asmInst{
     @Override
     public String toString() {
         if (rs1.isAddress){
-            StringBuilder stringBuilder = new StringBuilder("lw	"+ t0 + ", " + rs1.toString() + "(s0)\n");
-            stringBuilder.append( op + " " + t0 + ", "  + target);
+            StringBuilder stringBuilder = new StringBuilder("\t" + "lw	"+ t0 + ", " + rs1.toString() + "(s0)\n");
+            stringBuilder.append("\t" +  op + " " + t0 + ", "  + target);
             return stringBuilder.toString();
         }
-        return op + " " + rs1 + ", "  + target;
+        return "\t" + op + " " + rs1 + ", "  + target;
     }
 }

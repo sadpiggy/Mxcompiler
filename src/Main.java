@@ -27,9 +27,6 @@ public class Main{
         //InputStream input = new FileInputStream(name);
         InputStream input = System.in;
         try {
-            //生成具体语法树
-            // = true;
-
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxstarErrorListener());
@@ -60,9 +57,15 @@ public class Main{
                 asmRoot.regsAlloc();
                 System.setOut(new PrintStream(new BufferedOutputStream(
                 new FileOutputStream("output.s")),true));
+
+//                System.setOut(new PrintStream(new BufferedOutputStream(
+//                new FileOutputStream("ravel/build/test.s")),true));
+
                 asmRoot.printAsm(System.out);
+
+                //irFirstPass.printIr();
             }
-           // irFirstPass.printIr();
+
         } catch (Errormy er) {
             System.err.println(er.getString());
             throw new RuntimeException();

@@ -38,9 +38,9 @@ public class AsmGlobalValue extends asmOperand{
     @Override
     public String toString() {
         if (isString){
-            return ".type "+name+",@object\n" + name+":\n" + ".asciz	\"" + stringValue +"\"\n" + ".size " + name +", " + size;
+            return "\t"+ ".type "+name+",@object\n" +"\t"+ name+":\n" + "\t"+".asciz	\"" + stringValue +"\"\n" +"\t"+ ".size " + name +", " + size;
         }else {
-            return ".type "+name+",@object\n" + ".comm " + name + "," + printSize +"," + size;
+            return "\t"+".type "+name+",@object\n" + "\t"+".comm " + name + "," + printSize +"," + size;
         }
     }
 

@@ -17,14 +17,14 @@ public class MoveInst extends asmInst{
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
-            stringBuilder.append("lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
+            stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
             rs1 = t1;
         }
         if (rd.isAddress){
-            stringBuilder.append("mv " + t0 + ", " + rs1);
-            stringBuilder.append("sw " + t0 + ", " + rd.toString() + "(s0)");
+            stringBuilder.append("\t" + "mv " + t0 + ", " + rs1+"\n");
+            stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)");
             return stringBuilder.toString();
         }
-        return "mv " + rd + ", " + rs1;
+        return stringBuilder.append("\t" + "mv " + rd + ", " + rs1).toString();
     }
 }

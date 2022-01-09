@@ -50,34 +50,34 @@ public class AsmRoot {
 
 
         printStream.println(
-                ".text\n" +
-                        "\t.file\t\"pig.c\""
+                "\t.text\n" +
+                        "\t.file\t\"myTest.mx\""
         );
         for (var it : asmFuncs)it.printAsm();
 
-       printStream.println(".type\t.L.str,@object          # @.str\n" +
+       printStream.println("\t.type\t.L.str,@object          # @.str\n" +
                "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
-               ".L.str:\n" +
+               "\t.L.str:\n" +
                "\t.asciz\t\"%s\"\n" +
                "\t.size\t.L.str, 3\n" +
                "\n" +
                "\t.type\t.L.str.1,@object        # @.str.1\n" +
-               ".L.str.1:\n" +
+               "\t.L.str.1:\n" +
                "\t.asciz\t\"%s\\n\"\n" +
                "\t.size\t.L.str.1, 4\n" +
                "\n" +
                "\t.type\t.L.str.2,@object        # @.str.2\n" +
-               ".L.str.2:\n" +
+               "\t.L.str.2:\n" +
                "\t.asciz\t\"%d\"\n" +
                "\t.size\t.L.str.2, 3\n" +
                "\n" +
                "\t.type\t.L.str.3,@object        # @.str.3\n" +
-               ".L.str.3:\n" +
+               "\t.L.str.3:\n" +
                "\t.asciz\t\"%d\\n\"\n" +
                "\t.size\t.L.str.3, 4");
 
         for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
-        printStream.println(".ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
+        printStream.println("\t.ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
                 "\t.section\t\".note.GNU-stack\",\"\",@progbits\n");
     }
 

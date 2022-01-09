@@ -13,7 +13,7 @@ public class LlvmLabelType extends LlvmFirstClassType{
     }
 
     public String getName(){
-        return index;
+        return ".L"+index;
     }
 
     @Override

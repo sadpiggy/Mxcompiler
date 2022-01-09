@@ -25,14 +25,15 @@ public class SzInst extends asmInst{
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
-            stringBuilder.append("lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
+            stringBuilder.append("\t"+"lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
             rs1 = t1;
         }
         if (rd.isAddress){
-            stringBuilder.append(op + " " + t0 + ", " + rs1);
-            stringBuilder.append("sw " + t0 + ", " + rd.toString() + "(s0)");
+            stringBuilder.append("\t"+op + " " + t0 + ", " + rs1+"\n");
+            stringBuilder.append("\t"+"sw " + t0 + ", " + rd.toString() + "(s0)");
             return stringBuilder.toString();
         }
-        return op + " " + rd + ", " + rs1;
+
+        return stringBuilder.append(op + " " + rd + ", " + rs1).toString();
     }
 }

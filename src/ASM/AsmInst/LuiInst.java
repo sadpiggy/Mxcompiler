@@ -20,10 +20,10 @@ public class LuiInst extends asmInst{
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         if (rd.isAddress){
-            stringBuilder.append("lui " + t0 + ", " + imm);
-            stringBuilder.append("sw " + t0 + ", " + rd.toString() + "(s0)");
+            stringBuilder.append("\t" + "lui " + t0 + ", " + imm + "\n");
+            stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)");
             return stringBuilder.toString();
         }
-        return "lui " + rd + ", " + imm;
+        return "\t" + "lui " + rd + ", " + imm;
     }
 }

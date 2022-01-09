@@ -26,9 +26,10 @@ public class StoreInst extends asmInst{
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         if (rs2.isAddress){
-            stringBuilder.append("lw	"+ t1 + ", " + rs2.toString() + "(s0)\n");
+            stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs2.toString() + "(s0)\n");
             rs2 = t1;
         }
-        return op + " " + rs2 + ", " + offset + "(" + rs1 + ")";
+        stringBuilder.append("\t" + op + " " + rs2 + ", " + offset + "(" + rs1 + ")");
+        return stringBuilder.toString();
     }
 }

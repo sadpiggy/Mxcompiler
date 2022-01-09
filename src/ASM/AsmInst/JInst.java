@@ -12,6 +12,6 @@ public class JInst extends asmInst{
 
     @Override
     public String toString() {
-        return "j\t" + target;
+        return "\t" + "j\t" + target;
     }
 }
