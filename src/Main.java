@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.*;
+import java.util.Objects;
 
 public class Main{
     public static void main(String[] args) throws Exception{
@@ -41,6 +42,9 @@ public class Main{
             SymbolCollector symbolCollector = new SymbolCollector(globalScope);
             astRoot.acceptVisitor(symbolCollector);
             SemanticChecker semanticChecker = new SemanticChecker(globalScope);
+            for (int i=0;i< args.length;i++){
+                if (Objects.equals(args[i], "-fsyntax-only"))return;
+            }
            // astRoot.acceptVisitor(semanticChecker);
 
             //ir
