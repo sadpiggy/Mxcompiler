@@ -14,6 +14,11 @@ public class LlvmPointerType extends LlvmSingleValueType{
 
     @Override
     public int getSize() {
-        return 8;
+        return 32;
+    }
+
+    @Override
+    public int getAlignSize() {
+        return 4;
     }
 }

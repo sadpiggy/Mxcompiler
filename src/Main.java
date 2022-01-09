@@ -1,3 +1,7 @@
+import ASM.AsmOperand.AsmRoot;
+//import ASM.InstSelector;
+import ASM.ConflictAnalise;
+import ASM.InstSelector;
 import AST.AstBuilder;
 import AST.ProgramNode;
 import FrontEnd.SemanticChecker;
@@ -18,8 +22,8 @@ import java.io.*;
 public class Main{
     public static void main(String[] args) throws Exception{
         String name = "testcases/testcase/myTest.mx";
-        InputStream input = new FileInputStream(name);
-        //InputStream input = System.in;
+        //InputStream input = new FileInputStream(name);
+        InputStream input = System.in;
         try {
             //生成具体语法树
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
@@ -42,8 +46,14 @@ public class Main{
             //ir
             IrFirstPass irFirstPass = new IrFirstPass();
             irFirstPass.run(astRoot);
-            irFirstPass.printIr();
-            //IR builder  //我可能还要一个pass,来收集type
+            //codegen
+            AsmRoot asmRoot = new AsmRoot();
+            InstSelector instSelector = new InstSelector(irFirstPass,asmRoot);
+//           // System.out.println("skdf");
+            instSelector.run();
+            asmRoot.regsAlloc();
+            asmRoot.printAsm();
+            //irFirstPass.printIr();
         } catch (Errormy er) {
             System.err.println(er.getString());
             throw new RuntimeException();

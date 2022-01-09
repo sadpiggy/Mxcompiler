@@ -21,12 +21,13 @@ public class GlobalOperand extends Operand{
        if (type instanceof LlvmStructType){
            alignSize = 8;
        }else {
-           if (type.getSize()==1||type.getSize()==8){
-               alignSize = 1;
-           }else if (type.getSize()==32){
-               alignSize = 4;
-           }else{
-               alignSize = 8;
+           if (type instanceof LlvmPointerType)alignSize = 8;
+           else {
+               if (type.getSize()==1||type.getSize()==8){
+                   alignSize = 1;
+               }else if (type.getSize()==32){
+                   alignSize = 4;
+               }
            }
        }
        // this.isConst = isConst;

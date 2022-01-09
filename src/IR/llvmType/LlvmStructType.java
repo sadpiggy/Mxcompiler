@@ -19,8 +19,10 @@ public class LlvmStructType extends LlvmAggregateType{
     public void addMember(String memberName,LlvmSingleValueType member){
         members.add(member);
         memberNames.add(memberName);
-        memberSize.add(member.getSize());
-        size+=member.getSize();
+//        memberSize.add(member.getSize());
+//        size+=member.getSize();
+        memberSize.add(4);
+        size+=4;
     }
 
     @Override
@@ -45,12 +47,26 @@ public class LlvmStructType extends LlvmAggregateType{
         return size;
     }
 
+    @Override
+    public int getAlignSize() {
+        return 0;
+    }
+
     public int getIndex(String memberName){
         for(int i=0;i<memberNames.size();i++){
             if (Objects.equals(memberName, memberNames.get(i)))return i;
         }
        // System.out.println("llStruct 50");
         return 0;
+    }
+
+    public int getIndexAlign(int index){
+        int indexAlign = 0;
+        for (int i=0;i<index;i++){
+            indexAlign+=memberSize.get(i);
+        }
+        //System.out.println(indexAlign);
+        return indexAlign;
     }
 
     public boolean containMember(String memberName){

@@ -103,27 +103,43 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         //declare
         //printf
         IrFunc _printf = new IrFunc(new LlvmIntegerType(32,false),"printf",null,true);
+        _printf.isDeclare = true;
         funcs.add(_printf);
         //scanf
         IrFunc _scanf = new IrFunc(new LlvmIntegerType(32,false),"scanf",null,true);
+        _scanf.isDeclare = true;
         funcs.add(_scanf);
         //malloc
         IrFunc _malloc = new IrFunc(new LlvmPointerType(new LlvmIntegerType(8,false)),"malloc",null,true);
+        _malloc.isDeclare = true;
         funcs.add(_malloc);
 
         IrFunc _sprintf = new IrFunc(new LlvmIntegerType(32,false),"sprintf",null,true);
+        _sprintf.isDeclare = true;
         funcs.add(_sprintf);
+
         IrFunc _strcpy = new IrFunc(new LlvmPointerType(new LlvmIntegerType(8,false)),"strcpy",null,true);
+        _strcpy.isDeclare = true;
         funcs.add(_strcpy);
+
         IrFunc _strcat = new IrFunc(new LlvmPointerType(new LlvmIntegerType(8,false)),"strcat",null,true);
+        _strcat.isDeclare = true;
         funcs.add(_strcat);
+
         IrFunc _strcmp = new IrFunc(new LlvmIntegerType(32,false),"strcmp",null,true);
+        _strcmp.isDeclare = true;
         funcs.add(_strcmp);
+
         IrFunc _strlen = new IrFunc(new LlvmIntegerType(32,false),"strlen",null,true);
+        _strlen.isDeclare = true;
         funcs.add(_strlen);
+
         IrFunc _memcpy = new IrFunc(new LlvmVoidType(),"memcpy",null,true);
+        _memcpy.isDeclare = true;
         funcs.add(_memcpy);
+
         IrFunc _sscanf = new IrFunc(new LlvmIntegerType(32,false),"sscanf",null,true);
+        _sscanf.isDeclare = true;
         funcs.add(_sscanf);
 
 
@@ -501,6 +517,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         params.add(rReg);
         nowOperand = new Register(lReg.type,nowFunc.getMidRegName());
         LlvmIntegerType boolType = new LlvmIntegerType(8,true);
+        //System.out.println(lReg.typeName);
         if (typeName!=null&&typeName.equals("string")){//string之类的
             nowOperand.typeName = "string";
             CallInst inst = null;
@@ -649,12 +666,18 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
        // System.out.println(callFunc.type.toString());
         if (!Objects.equals(callFunc.type.toString(), "void")){
             nowOperand = new Register(callFunc.type, nowFunc.getMidRegName());
+            if (Objects.equals(callFunc.name, "getString")|| Objects.equals(callFunc.name, "toString")|| Objects.equals(callFunc.name, "string_substring")|| Objects.equals(callFunc.name, "string_add")){
+                nowOperand.typeName = "string";
+                //System.out.println("ll");
+            }
+           // System.out.println(callFunc.name);
             inst = new CallInst(nowOperand,nowBlock,callFunc,realParams);
         }else {
             //System.out.println(callFunc.type.toString());
             inst = new CallInst(nowBlock,callFunc,realParams);
         }
         nowBlock.push_back(inst);
+        //System.out.println(nowOperand.typeName);
     }
 
     @Override
@@ -815,6 +838,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         // System.out.println(callFunc.type.toString());
         if (!Objects.equals(callFunc.type.toString(), "void")){
             nowOperand = new Register(callFunc.type, nowFunc.getMidRegName());
+            if (Objects.equals(callFunc.name, "getString")|| Objects.equals(callFunc.name, "toString")|| Objects.equals(callFunc.name, "string_substring")|| Objects.equals(callFunc.name, "string_add")){
+                nowOperand.typeName = "string";
+                //System.out.println("ll");
+            }
             inst = new CallInst(nowOperand,nowBlock,callFunc,realParams);
         }else {
             //System.out.println(callFunc.type.toString());

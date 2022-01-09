@@ -14,4 +14,9 @@ public class LlvmVoidType extends LlvmSingleValueType{
     public int getSize() {
         return 0;
     }
+
+    @Override
+    public int getAlignSize() {
+        return 0;
+    }
 }

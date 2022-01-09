@@ -20,6 +20,11 @@ public class LlvmIntegerType extends LlvmSingleValueType{//1 bit i位
 
     @Override
     public int getSize() {
-        return width;
+        return 32;
+    }
+
+    @Override
+    public int getAlignSize() {
+        return 4;
     }
 }

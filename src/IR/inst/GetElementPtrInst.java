@@ -21,5 +21,6 @@ public class GetElementPtrInst extends Inst{
         StringBuilder ret = new StringBuilder(destReg.toString() + " = getelementptr " + ((LlvmPointerType) pointer.type).pointeeType.toString() + ", " + pointer.type.toString() + " " + pointer.toString());
         for (var index: indexes) ret.append(", ").append(index.type.toString()).append(" ").append(index.toString());
         return ret.toString();
+
     }
 }

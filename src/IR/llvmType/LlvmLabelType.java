@@ -12,8 +12,17 @@ public class LlvmLabelType extends LlvmFirstClassType{
         return "%" + index;
     }
 
+    public String getName(){
+        return index;
+    }
+
     @Override
     public int getSize() {
+        return 0;
+    }
+
+    @Override
+    public int getAlignSize() {
         return 0;
     }
 }

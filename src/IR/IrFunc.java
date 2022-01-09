@@ -17,6 +17,7 @@ public class IrFunc extends Operand{
     public ArrayList<Register>formParams;
     public LinkedList<IrBlock>blocks;
     public boolean isBuildIn;
+    public boolean isDeclare;
     public int nowBlockNum;//p0
     public IrBlock headBlock;
     public int nowMidRegNum;//m0
@@ -28,6 +29,7 @@ public class IrFunc extends Operand{
 
     public IrFunc(LlvmSingleValueType type,String name,ArrayList<Register>formParams,boolean isBuildIn) {
         super(type);
+        isDeclare = false;
         this.name = name;
         this.formParams = formParams;
         this.blocks = new LinkedList<>();
@@ -40,7 +42,7 @@ public class IrFunc extends Operand{
     }
 
     public String getBlockLabel(){
-        return "block" + nowBlockNum++;
+        return "block" + name + nowBlockNum++;
     }
 
     public String getMidRegName(){return "m" + nowMidRegNum++;}

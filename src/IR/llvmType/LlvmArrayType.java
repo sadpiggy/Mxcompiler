@@ -20,4 +20,9 @@ public class LlvmArrayType extends LlvmAggregateType{//这个不用了,因为这
     public int getSize() {
         return size;
     }
+
+    @Override
+    public int getAlignSize() {
+        return 0;
+    }
 }
