@@ -80,7 +80,7 @@ public class AsmFunc {
                     "\t.type\t"+ name + ",@function\n" + name + ":\n"        +
                     "\t.cfi_startproc\n" + "# %bb.0:");
             for (var it : blocks)it.printAsm();
-            System.out.println(".Lfunc_end" + name+ ":\n" +
+            System.out.println(".Lfunc_end" + i+ ":\n" +
                     "\t.size\t" + name + ", .Lfunc_end" + i + "-" + name + "\n" +
                     "\t.cfi_endproc\n" +
                     "                                        # -- End function");
