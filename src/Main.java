@@ -22,10 +22,12 @@ import java.util.Objects;
 
 public class Main{
     public static void main(String[] args) throws Exception{
+        boolean isLocal = false;
         boolean semanticOnly = args.length > 0 && args[0].equals("--semantic_only");
         String name = "testcases/testcase/myTest.mx";
-       // InputStream input = new FileInputStream(name);
-        InputStream input = System.in;
+        InputStream input = null;
+        if (isLocal) input = new FileInputStream(name);
+        else input = System.in;
         try {
             MxstarLexer lexer = new MxstarLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
@@ -55,11 +57,11 @@ public class Main{
 //           // System.out.println("skdf");
                 instSelector.run();
                 asmRoot.regsAlloc();
+                if (!isLocal)
                 System.setOut(new PrintStream(new BufferedOutputStream(
                 new FileOutputStream("output.s")),true));
-
-//                System.setOut(new PrintStream(new BufferedOutputStream(
-//                new FileOutputStream("ravel/build/test.s")),true));
+                else System.setOut(new PrintStream(new BufferedOutputStream(
+                new FileOutputStream("ravel/build/test.s")),true));
 
                 asmRoot.printAsm(System.out);
 

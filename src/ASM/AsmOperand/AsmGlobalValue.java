@@ -43,7 +43,8 @@ public class AsmGlobalValue extends asmOperand{
     @Override
     public String toString() {
         if (isStringContain){
-            return "\t"+ ".type "+name+",@object\n" +"\t"+ name+":\n" + "\t"+".asciz	\"" + stringValue +"\"\n" +"\t"+ ".size " + name +", " + size;
+            //return "\t"+ ".type "+name+",@object\n" +"\t"+ name+":\n" + "\t"+".asciz	\"" + stringValue +"\"\n" +"\t"+ ".size " + name +", " + size;
+            return name + ":\n" + "\t.asciz\t" + "\"" + stringValue + "\"\n";
         }else {
             if (isString){
                 return "\t.globl\t" + name + "\n"
