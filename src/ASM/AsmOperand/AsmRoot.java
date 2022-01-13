@@ -6,16 +6,19 @@ import ASM.ConflictAnalise;
 import ASM.RegisterAlloc;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class AsmRoot {
     public ArrayList<AsmFunc> asmFuncs;
     public ArrayList<AsmGlobalValue> asmGlobalValues;
+    public ArrayList<AsmGlobalValue> asmStringContains;
     public boolean hasString;
 
     public AsmRoot(){
         asmFuncs = new ArrayList<>();
         asmGlobalValues = new ArrayList<>();
+        asmStringContains = new ArrayList<>();
     }
 
     public void regsAlloc(){
@@ -78,10 +81,14 @@ public class AsmRoot {
                "\t.asciz\t\"%d\\n\"\n" +
                "\t.size\t.L.str.3, 4");
 
-        for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
-//
-//        printStream.println("\t.ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
-//                "\t.section\t\".note.GNU-stack\",\"\",@progbits\n");
+        for (var it :asmStringContains){
+            printStream.println(it.toString()+"\n");
+        }
+
+        if (asmGlobalValues.size()!=0){
+            printStream.println("\t.section\t.sdata,\"aw\",@progbits");
+            for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
+        }
 
     }
 

@@ -15,6 +15,8 @@ import IR.llvmType.LlvmPointerType;
 import IR.llvmType.LlvmStructType;
 import IR.operand.*;
 
+import java.util.Objects;
+
 public class InstSelector {//构造函数那里有bug
     //sp 16的倍数
     //s0 - 8 - offset
@@ -112,10 +114,14 @@ public class InstSelector {//构造函数那里有bug
 
     public void run(){
         for (var it : irFirstPass.stringConsts){
-            asmRoot.asmGlobalValues.add(new AsmGlobalValue(it.name, it.value, it.stringSize));
+            asmRoot.asmStringContains.add(new AsmGlobalValue(it.name, it.value, it.stringSize,true));
         }
         for (var it : irFirstPass.globalOperands){
-            asmRoot.asmGlobalValues.add(new AsmGlobalValue(it.name,it.alignSize));
+            if (Objects.equals(it.typeName, "string")){
+                asmRoot.asmGlobalValues.add(new AsmGlobalValue(it.name, it.value, it.alignSize,false));
+            }else {
+                asmRoot.asmGlobalValues.add(new AsmGlobalValue(it.name, it.alignSize));
+            }
         }
         for (var it : irFirstPass.funcs){
             if (!it.isDeclare){

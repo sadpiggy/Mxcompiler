@@ -6,6 +6,7 @@ public class AsmGlobalValue extends asmOperand{
     public String stringValue;
     public boolean isString;
     public int printSize;
+    public boolean isStringContain;
 
     public AsmGlobalValue(String name,int size){
         this.name = name;
@@ -16,14 +17,18 @@ public class AsmGlobalValue extends asmOperand{
         }else {
             printSize = 4;
         }
+        isStringContain = false;
     }
 
-    public AsmGlobalValue(String name,String stringValue,int size){
+    public AsmGlobalValue(String name,String stringValue,int size,boolean isStringContain){
         this.name = name;
         this.stringValue = stringValue;
         isString = true;
         this.size = size;
+        this.isStringContain = isStringContain;
     }
+
+
 
     /*
     type	.L.str,@object          # @.str
@@ -37,10 +42,20 @@ public class AsmGlobalValue extends asmOperand{
      */
     @Override
     public String toString() {
-        if (isString){
+        if (isStringContain){
             return "\t"+ ".type "+name+",@object\n" +"\t"+ name+":\n" + "\t"+".asciz	\"" + stringValue +"\"\n" +"\t"+ ".size " + name +", " + size;
         }else {
-            return "\t"+".type "+name+",@object\n" + "\t"+".comm " + name + "," + printSize +"," + size;
+            if (isString){
+                return "\t.globl\t" + name + "\n"
+                        + "\t.p2align\t2\n"
+                        + name + ":\n"
+                        + "\t.word\t" + ".L.str.1" + "\n";
+            }else {
+                return "\t.globl\t" + name + "\n"
+                        + "\t.p2align\t2\n"
+                        + name + ":\n"
+                        + "\t.word\t" + 0 + "\n";
+            }
         }
     }
 
