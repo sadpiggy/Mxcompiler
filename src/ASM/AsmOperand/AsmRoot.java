@@ -53,7 +53,9 @@ public class AsmRoot {
                 "\t.text\n" +
                         "\t.file\t\"myTest.mx\""
         );
-        for (var it : asmFuncs)it.printAsm();
+        for (int i=0;i< asmFuncs.size();i++){
+            asmFuncs.get(i).printAsm(i);
+        }
 
        printStream.println("\t.type\t.L.str,@object          # @.str\n" +
                "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
@@ -77,8 +79,10 @@ public class AsmRoot {
                "\t.size\t.L.str.3, 4");
 
         for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
-        printStream.println("\t.ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
-                "\t.section\t\".note.GNU-stack\",\"\",@progbits\n");
+//
+//        printStream.println("\t.ident\t\"clang version 10.0.0-4ubuntu1~18.04.2 \"\n" +
+//                "\t.section\t\".note.GNU-stack\",\"\",@progbits\n");
+
     }
 
 }

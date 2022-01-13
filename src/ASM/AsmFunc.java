@@ -73,7 +73,7 @@ public class AsmFunc {
         blocks.addLast(block);
     }
 
-    public void printAsm() throws FileNotFoundException {
+    public void printAsm(int i) throws FileNotFoundException {
         if (!isBuildIn){
             System.out.println("\t.globl\t" + name +  "    # -- Begin function main\n" +
                     "\t.p2align\t2\n" +
@@ -81,7 +81,7 @@ public class AsmFunc {
                     "\t.cfi_startproc\n" + "# %bb.0:");
             for (var it : blocks)it.printAsm();
             System.out.println(".Lfunc_end" + name+ ":\n" +
-                    "\t.size\t" + name + ", .Lfunc_end10-" + name + "\n" +
+                    "\t.size\t" + name + ", .Lfunc_end" + i + "-" + name + "\n" +
                     "\t.cfi_endproc\n" +
                     "                                        # -- End function");
 
