@@ -75,9 +75,9 @@ public class AsmFunc {
 
     public void printAsm(int i) throws FileNotFoundException {
         if (!isBuildIn){
-            System.out.println("\t.globl\t" + name +  "    # -- Begin function main\n" +
+            System.out.println("\t.globl\t" + name +  "\n" +
                     "\t.p2align\t2\n" +
-                    "\t.type\t"+ name + ",@function\n" + name + ":\n"        +
+                      name + ":\n"        +
                     "\t.cfi_startproc\n" + "# %bb.0:");
             for (var it : blocks)it.printAsm();
             System.out.println(".Lfunc_end" + i+ ":\n" +
