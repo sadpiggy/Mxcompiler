@@ -72,7 +72,7 @@ public class AsmFunc {
         if (blocks.size()==0)headBlock = block;
         blocks.addLast(block);
     }
-
+//sjkdc
     public void printAsm(int i) throws FileNotFoundException {
         if (!isBuildIn){
             System.out.println("\t.globl\t" + name +  "\n" +
