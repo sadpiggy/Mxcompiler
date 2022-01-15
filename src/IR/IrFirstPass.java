@@ -29,7 +29,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public ScopeForBuild nowScope;
     //public int nowRegisterNum;//for func?need? nowFunc.getReg
     public IrBlock nowBlock;
-   // public Register nowRegister;
+    // public Register nowRegister;
     public Operand nowOperand;
     public int stringConstNum;
     public boolean isLeft;//这个之后要想办法取代
@@ -38,7 +38,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public IrBlock loopNextBlock;
     public IrBlock loopCondBlock;
     public ArrayList<AssignExprNode>globalInitNodes;
-   // public IrBlock endBlock;
+    // public IrBlock endBlock;
     //public String nowStructName;
 
     public IrFirstPass(){
@@ -46,7 +46,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         funcs = new ArrayList<>();
         globalOperands = new ArrayList<>();
         stringConsts = new ArrayList<>();
-       // nowScope = null;
+        // nowScope = null;
         nowConst = null;
         nowScope = null;
         nowStruct = null;
@@ -60,7 +60,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         loopCondBlock = null;
         loopNextBlock = null;
         globalInitNodes = new ArrayList<>();
-       // nowStructName = null;
+        // nowStructName = null;
     }
 
     public void run(ProgramNode node){
@@ -143,7 +143,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         funcs.add(_sscanf);
 
 
-       //内建函数
+        //内建函数
         IrFunc print = new IrFunc(new LlvmVoidType(),"print",null,true);
         funcs.add(print);
 
@@ -284,7 +284,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }else {
             llvmType = new LlvmPointerType(new LlvmPointerType(getStruct(typeNode.type_name)));
         }
-       /// System.out.println(typeNode.getNum());
+        /// System.out.println(typeNode.getNum());
         for (int i=2;i<= num;i++){
             llvmType = new LlvmPointerType((LlvmFirstClassType) llvmType);
             llvmType.isArray = true;
@@ -307,12 +307,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             llvmType = new LlvmPointerType(getStruct(typeNode.type_name));
             isStruct = true;
         }
-       //return getStruct(typeNode.type_name);
-       // if (!isStruct){
-            for (int i=1;i<= typeNode.getNum();i++){
-                llvmType = new LlvmPointerType((LlvmFirstClassType) llvmType);
-                llvmType.isArray = true;
-            }
+        //return getStruct(typeNode.type_name);
+        // if (!isStruct){
+        for (int i=1;i<= typeNode.getNum();i++){
+            llvmType = new LlvmPointerType((LlvmFirstClassType) llvmType);
+            llvmType.isArray = true;
+        }
         return llvmType;
     }
 
@@ -400,7 +400,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             }
         }
         //third getAllName
-       // programNode.acceptVisitor(this);
+        // programNode.acceptVisitor(this);
         //fourth buildIr
     }
 
@@ -524,9 +524,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             IrFunc irFunc = null;
             switch (node.getOp()){
                 case Add: irFunc = getFunc("string_add");irFunc.isUsed = true;
-                inst = new CallInst(nowOperand,nowBlock,irFunc,params);break;
+                    inst = new CallInst(nowOperand,nowBlock,irFunc,params);break;
                 case Equal:irFunc = getFunc("string_equal");irFunc.isUsed = true;
-                inst = new CallInst(nowOperand,nowBlock,irFunc,params);break;
+                    inst = new CallInst(nowOperand,nowBlock,irFunc,params);break;
                 case NotEqual:irFunc = getFunc("string_notequal");irFunc.isUsed = true;
                     inst = new CallInst(nowOperand,nowBlock,irFunc,params);break;
                 case Less:irFunc = getFunc("string_lesser");irFunc.isUsed = true;
@@ -626,11 +626,11 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowBlock.push_back(initBrInst);
         nowBlock = condBlock;
         nowFunc.setBlock(condBlock);
-       if (node.getConditionExpr()!=null){
-           node.getConditionExpr().acceptVisitor(this);
-           BrInst condBrinst = new BrInst(nowBlock,nowOperand, bodyBlock.label,nextBlock.label);
-           nowBlock.push_back(condBrinst);
-       }else nowBlock.push_back(new BrInst(nowBlock, bodyBlock.label));
+        if (node.getConditionExpr()!=null){
+            node.getConditionExpr().acceptVisitor(this);
+            BrInst condBrinst = new BrInst(nowBlock,nowOperand, bodyBlock.label,nextBlock.label);
+            nowBlock.push_back(condBrinst);
+        }else nowBlock.push_back(new BrInst(nowBlock, bodyBlock.label));
         nowBlock = bodyBlock;
         nowFunc.setBlock(bodyBlock);
         node.getStmt().acceptVisitor(this);
@@ -639,10 +639,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowFunc.setBlock(changeBlock);
         nowBlock = changeBlock;
         if (node.getChangeExpr()!=null)
-        node.getChangeExpr().acceptVisitor(this);
+            node.getChangeExpr().acceptVisitor(this);
         BrInst changeBrinst = new BrInst(nowBlock, condBlock.label);
         ///////
-       // System.out.println(node.getChangeExpr());
+        // System.out.println(node.getChangeExpr());
         nowBlock.push_back(changeBrinst);
         nowFunc.setBlock(nextBlock);
         nowBlock = nextBlock;
@@ -663,14 +663,14 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             }
         }
         CallInst inst = null;
-       // System.out.println(callFunc.type.toString());
+        // System.out.println(callFunc.type.toString());
         if (!Objects.equals(callFunc.type.toString(), "void")){
             nowOperand = new Register(callFunc.type, nowFunc.getMidRegName());
             if (Objects.equals(callFunc.name, "getString")|| Objects.equals(callFunc.name, "toString")|| Objects.equals(callFunc.name, "string_substring")|| Objects.equals(callFunc.name, "string_add")){
                 nowOperand.typeName = "string";
                 //System.out.println("ll");
             }
-           // System.out.println(callFunc.name);
+            // System.out.println(callFunc.name);
             inst = new CallInst(nowOperand,nowBlock,callFunc,realParams);
         }else {
             //System.out.println(callFunc.type.toString());
@@ -803,7 +803,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             nowOperand = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this");
         }
         isLeft = oldIsLeft;
-       // System.out.println(nowOperand.typeName);
+        // System.out.println(nowOperand.typeName);
         getThisMember(node.getMemberName());
         nowStruct = oldStruct;
     }
@@ -892,7 +892,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             //cond
             nowBlock = condBlock;
             nowFunc.setBlock(condBlock);
-           // nowBlock.push_back(new BinaryInst(nowIndex,nowBlock, BinaryInst.InstOp.add,new IntegerConst(32,false,0),new IntegerConst(32,false,0)));
+            // nowBlock.push_back(new BinaryInst(nowIndex,nowBlock, BinaryInst.InstOp.add,new IntegerConst(32,false,0),new IntegerConst(32,false,0)));
             Register nowIndexTemp = new Register(new LlvmIntegerType(32,false),nowFunc.getMidRegName());
             nowBlock.push_back(new LoadInst(nowIndexTemp,nowBlock,nowIndex));
             Register condReg = new Register(new LlvmIntegerType(8,true),nowFunc.getMidRegName());
@@ -936,37 +936,37 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         //node.num是怎么得到的啊,new int[3][3][]的num应该是3吧，希望当时是这样写的//感激，之前是这样写的
         //pig[] a; a = new pig[]//int[] a;a=new int
         //int*a = new int; int*a = new int[10];
-       if (node.getNum()==0){
-           Operand leftValue = nowOperand;
-           String name = null;
-           boolean isStruct = false;
-           LlvmFirstClassType type = (LlvmSingleValueType) getLlvmType(node.getNameTypeNode());
-           if (type instanceof LlvmPointerType){
-               type = getStruct(node.getNameTypeNode().type_name);
-               name = ((LlvmStructType) type).structName;
-               isStruct = true;
-           }
-           IrFunc mallocFunc = getFunc("malloc");
-           Register callReg = new Register(new LlvmPointerType(new LlvmIntegerType(8,false)),nowFunc.getMidRegName());
-           ArrayList<Operand>params = new ArrayList<>();
-           params.add(new IntegerConst(64,false,type.getSize()));
-           CallInst callInst = new CallInst(callReg,nowBlock,mallocFunc,params);
-           Register bitCastReg = new Register(new LlvmPointerType(type),nowFunc.getMidRegName());
-           BitcastInst bitcastInst = new BitcastInst(bitCastReg,nowBlock,callReg);
-           nowBlock.push_back(callInst);
-           nowBlock.push_back(bitcastInst);
-           nowOperand = bitCastReg;
-           if (isStruct){
-               ArrayList<Operand>paramsConstruct = new ArrayList<>();
-               paramsConstruct.add(nowOperand);
-               nowBlock.push_back(new CallInst(nowBlock,getFunc(name+"_" +name),paramsConstruct));
-           }
-       }else {//a = new int;//这个我现在的体系解决不了 //new pig //new pig[10]
-           boolean oldIsLeft = isLeft;//SB设计
-           isLeft = false;
-           nowOperand = arrayCreator(node.getExprInBracket(),0, (LlvmPointerType) getLlvmArrayType(node.getNameTypeNode(),node.getNum()));
-           isLeft = oldIsLeft;
-       }
+        if (node.getNum()==0){
+            Operand leftValue = nowOperand;
+            String name = null;
+            boolean isStruct = false;
+            LlvmFirstClassType type = (LlvmSingleValueType) getLlvmType(node.getNameTypeNode());
+            if (type instanceof LlvmPointerType){
+                type = getStruct(node.getNameTypeNode().type_name);
+                name = ((LlvmStructType) type).structName;
+                isStruct = true;
+            }
+            IrFunc mallocFunc = getFunc("malloc");
+            Register callReg = new Register(new LlvmPointerType(new LlvmIntegerType(8,false)),nowFunc.getMidRegName());
+            ArrayList<Operand>params = new ArrayList<>();
+            params.add(new IntegerConst(64,false,type.getSize()));
+            CallInst callInst = new CallInst(callReg,nowBlock,mallocFunc,params);
+            Register bitCastReg = new Register(new LlvmPointerType(type),nowFunc.getMidRegName());
+            BitcastInst bitcastInst = new BitcastInst(bitCastReg,nowBlock,callReg);
+            nowBlock.push_back(callInst);
+            nowBlock.push_back(bitcastInst);
+            nowOperand = bitCastReg;
+            if (isStruct){
+                ArrayList<Operand>paramsConstruct = new ArrayList<>();
+                paramsConstruct.add(nowOperand);
+                nowBlock.push_back(new CallInst(nowBlock,getFunc(name+"_" +name),paramsConstruct));
+            }
+        }else {//a = new int;//这个我现在的体系解决不了 //new pig //new pig[10]
+            boolean oldIsLeft = isLeft;//SB设计
+            isLeft = false;
+            nowOperand = arrayCreator(node.getExprInBracket(),0, (LlvmPointerType) getLlvmArrayType(node.getNameTypeNode(),node.getNum()));
+            isLeft = oldIsLeft;
+        }
     }
 
     @Override
@@ -990,7 +990,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             }else if (it instanceof FuncDefNode){
                 isInClass = false;
                 nowFunc = getFunc(((FuncDefNode) it).getIdentifier());
-               // System.out.println(nowFunc.toString());
+                // System.out.println(nowFunc.toString());
                 it.acceptVisitor(this);
             }else {
 

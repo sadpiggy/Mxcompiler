@@ -22,7 +22,7 @@ import java.util.Objects;
 
 public class Main{
     public static void main(String[] args) throws Exception{
-        boolean isLocal = false;
+        boolean isLocal = true;
         boolean semanticOnly = args.length > 0 && args[0].equals("--semantic_only");
         String name = "testcases/testcase/myTest.mx";
         InputStream input = null;
@@ -65,7 +65,7 @@ public class Main{
 
                 asmRoot.printAsm(System.out);
 
-                //irFirstPass.printIr();
+                irFirstPass.printIr();
             }
 
         } catch (Errormy er) {

@@ -53,40 +53,60 @@ public class AsmRoot {
 
 
         printStream.println(
-                "\t.text\n" +
-                        "\t.file\t\"myTest.mx\""
+                "\t.text\n"
+                        //+ "\t.file\t\"myTest.mx\""
         );
         for (int i=0;i< asmFuncs.size();i++){
             asmFuncs.get(i).printAsm(i);
         }
 
-       printStream.println("\t.type\t.L.str,@object          # @.str\n" +
-               "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
-               "\t.L.str:\n" +
-               "\t.asciz\t\"%s\"\n" +
-               "\t.size\t.L.str, 3\n" +
-               "\n" +
-               "\t.type\t.L.str.1,@object        # @.str.1\n" +
-               "\t.L.str.1:\n" +
-               "\t.asciz\t\"%s\\n\"\n" +
-               "\t.size\t.L.str.1, 4\n" +
-               "\n" +
-               "\t.type\t.L.str.2,@object        # @.str.2\n" +
-               "\t.L.str.2:\n" +
-               "\t.asciz\t\"%d\"\n" +
-               "\t.size\t.L.str.2, 3\n" +
-               "\n" +
-               "\t.type\t.L.str.3,@object        # @.str.3\n" +
-               "\t.L.str.3:\n" +
-               "\t.asciz\t\"%d\\n\"\n" +
-               "\t.size\t.L.str.3, 4");
+        printStream.println("\t.section\t.sdata,\"aw\",@progbits");
+
+        printStream.println(
+               // "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
+                        "\t.L.str:\n" +
+                        "\t.asciz\t\"%s\"\n" +
+
+                        "\t.L.str.1:\n" +
+                        "\t.asciz\t\"%s\\n\"\n" +
+
+                        "\t.L.str.2:\n" +
+                        "\t.asciz\t\"%d\"\n" +
+
+                        "\t.L.str.3:\n" +
+                        "\t.asciz\t\"%d\\n\"\n" );
+
+
+//       printStream.println(
+//               "\t.type\t.L.str,@object          # @.str\n" +
+//               "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
+//               "\t.L.str:\n" +
+//               "\t.asciz\t\"%s\"\n" +
+//               "\t.size\t.L.str, 3\n" +
+//               "\n" +
+//               "\t.type\t.L.str.1,@object        # @.str.1\n" +
+//               "\t.L.str.1:\n" +
+//               "\t.asciz\t\"%s\\n\"\n" +
+//               "\t.size\t.L.str.1, 4\n" +
+//               "\n" +
+//               "\t.type\t.L.str.2,@object        # @.str.2\n" +
+//               "\t.L.str.2:\n" +
+//               "\t.asciz\t\"%d\"\n" +
+//               "\t.size\t.L.str.2, 3\n" +
+//               "\n" +
+//               "\t.type\t.L.str.3,@object        # @.str.3\n" +
+//               "\t.L.str.3:\n" +
+//               "\t.asciz\t\"%d\\n\"\n" +
+//               "\t.size\t.L.str.3, 4");
+
+        printStream.println();
 
         for (var it :asmStringContains){
             printStream.println(it.toString()+"\n");
         }
 
         if (asmGlobalValues.size()!=0){
-            printStream.println("\t.section\t.sdata,\"aw\",@progbits");
+            //printStream.println("\t.section\t.sdata,\"aw\",@progbits");
             for (var it : asmGlobalValues){printStream.println(it.toString()+"\n");}
         }
 

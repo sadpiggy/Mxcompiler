@@ -42,5 +42,3 @@ int main()
 		print(toString(b[3][i]));
     return 0;
 }
-
-
