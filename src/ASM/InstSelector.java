@@ -84,7 +84,8 @@ public class InstSelector {//构造函数那里有bug
             PhysicalReg physicalReg;
             if (isRs1)physicalReg = t1;
             else physicalReg = t2;
-            currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,physicalReg,zero,new IntegerImm(integerConst.value)));
+            currentAsmBlock.push_back(new LiInst(currentAsmBlock,physicalReg,new IntegerImm(integerConst.value)));
+            //currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,physicalReg,zero,new IntegerImm(integerConst.value)));
             return physicalReg;
         }else if (operand instanceof StringConst){
             StringConst stringConst = (StringConst) operand;

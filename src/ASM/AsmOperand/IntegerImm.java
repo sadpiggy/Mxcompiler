@@ -10,4 +10,6 @@ public class IntegerImm extends Imm {
     public String toString() {
         return String.valueOf(value);
     }
+
+    public boolean isValidImm() {return - ((1 << 11) - 1) <= value && value <= (1 << 11) - 1;}
 }

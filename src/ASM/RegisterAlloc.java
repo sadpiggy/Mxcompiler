@@ -16,7 +16,12 @@ public class RegisterAlloc {
     }
 
     public void foolishAlloc(){
-        ArrayList<PhysicalReg> registers = new ArrayList<>(asmFunc.registers);
+        ArrayList<PhysicalReg> registers = new ArrayList<>();//asmFunc.registers
+        for (var it : asmFunc.registers){
+            if (it.isVirtual||it.isAddress){
+                registers.add(it);
+            }
+        }
         boolean value = true;
         while (value){
             value = deleteNode(registers);

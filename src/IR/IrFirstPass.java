@@ -218,12 +218,22 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     }
 
     public void getThisMember(String name){//aa.a
+        //System.out.println(name);
         ArrayList<Operand>indexs = new ArrayList<>();
         indexs.add(new IntegerConst(32,false,0));
+        //if (nowStruct==null)System.out.println(name);
         indexs.add(new IntegerConst(32,false,nowStruct.getIndex(name)));
         Register thisReg = new Register(new LlvmPointerType(nowStruct),nowFunc.getMidRegName());
         nowBlock.push_back(new LoadInst(thisReg,nowBlock,nowOperand));
         Register register = new Register(new LlvmPointerType(nowStruct.getMemberType(name)),nowFunc.getMidRegName());
+        LlvmSingleValueType memberType = nowStruct.getMemberType(name);
+        if (memberType instanceof LlvmPointerType){
+            if (((LlvmPointerType) memberType).pointeeType instanceof LlvmStructType){
+                //nowStruct = (LlvmStructType) (((LlvmPointerType) memberType).pointeeType);
+                register.typeName = ((LlvmStructType) (((LlvmPointerType) memberType).pointeeType)).structName;
+                //System.out.println(nowStruct);
+            }
+        }
         nowBlock.push_back(new GetElementPtrInst(register,nowBlock,thisReg,indexs));
         nowOperand = register;
         if (!isLeft){
@@ -792,7 +802,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(MemberExprNode node) {
-        //pig.a
+        //pig.a b.p.a
         boolean oldIsLeft = isLeft;
         isLeft = true;
         node.getObjExpr().acceptVisitor(this);
@@ -804,8 +814,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }
         isLeft = oldIsLeft;
         // System.out.println(nowOperand.typeName);
+       // System.out.println(nowStruct);
         getThisMember(node.getMemberName());
-        nowStruct = oldStruct;
+        //nowStruct = oldStruct;
     }
 
     @Override
@@ -816,8 +827,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             Register sizeAddress = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName());
             Register oralAddress = new Register(nowOperand.type,nowFunc.getMidRegName());
             ArrayList<Operand>index = new ArrayList<>();
-            index.add(new IntegerConst(64,false,-8));
-            nowBlock.push_back(new GetElementPtrInst(oralAddress,nowBlock,nowOperand,index));
+            index.add(new IntegerConst(64,false,-1));
+            Register sizeAddress2 = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName());
+            nowBlock.push_back(new BitcastInst(sizeAddress2,nowBlock,nowOperand));
+            nowBlock.push_back(new GetElementPtrInst(oralAddress,nowBlock,sizeAddress2,index));
             nowBlock.push_back(new BitcastInst(sizeAddress,nowBlock,oralAddress));
             nowBlock.push_back(new LoadInst(arraySize,nowBlock,sizeAddress));
             nowOperand = arraySize;
@@ -864,19 +877,29 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         Register sextReg = new Register(new LlvmIntegerType(64,false),nowFunc.getMidRegName());
         nowBlock.push_back(new SextInst(sextReg,nowBlock,nowOperand));
         //产生size
-        Register arraySize = new Register(new LlvmPointerType(new LlvmIntegerType(64,false)),nowFunc.getMidRegName());
+        Register arraySize = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName());
         Register arraySizeBitCast = new Register(new LlvmPointerType(new LlvmIntegerType(8,false)),nowFunc.getMidRegName());
         ArrayList<Operand>sizeParams = new ArrayList<>();
-        sizeParams.add(new IntegerConst(64,false,8));
+        //sizeParams.add(new IntegerConst(64,false,4));
+        Register sizeReg2 = new Register(new LlvmIntegerType(64,false),nowFunc.getMidRegName());
+        nowBlock.push_back(new BinaryInst(sizeReg,nowBlock, BinaryInst.InstOp.mul,new IntegerConst(64,false,currentType.pointeeType.getAlignSize()),sextReg));
+        nowBlock.push_back(new BinaryInst(sizeReg2,nowBlock, BinaryInst.InstOp.add,new IntegerConst(64,false,4),sizeReg));
+        //ArrayList<Operand>params = new ArrayList<>();
+
+        sizeParams.add(sizeReg2);
+
         nowBlock.push_back(new CallInst(arraySizeBitCast,nowBlock,mallocFunc,sizeParams));
         nowBlock.push_back(new BitcastInst(arraySize,nowBlock,arraySizeBitCast));
-        nowBlock.push_back(new StoreInst(nowBlock,sextReg,arraySize));
+        nowBlock.push_back(new StoreInst(nowBlock,nowOperand,arraySize));
 
-        nowBlock.push_back(new BinaryInst(sizeReg,nowBlock, BinaryInst.InstOp.mul,new IntegerConst(64,false,currentType.pointeeType.getSize()),sextReg));
+        //nowBlock.push_back(new BinaryInst(sizeReg,nowBlock, BinaryInst.InstOp.mul,new IntegerConst(64,false,currentType.pointeeType.getAlignSize()),sextReg));
+        //ArrayList<Operand>params = new ArrayList<>();
+        //params.add(sizeReg);
+        Register bitcastReg = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName());
         ArrayList<Operand>params = new ArrayList<>();
-        params.add(sizeReg);
-        Register bitcastReg = new Register(new LlvmPointerType(new LlvmIntegerType(8,false)),nowFunc.getMidRegName());
-        nowBlock.push_back(new CallInst(bitcastReg,nowBlock,mallocFunc,params));
+        params.add(new IntegerConst(32,false,1));
+        nowBlock.push_back(new GetElementPtrInst(bitcastReg,nowBlock,arraySize,params));
+        //nowBlock.push_back(new CallInst(bitcastReg,nowBlock,mallocFunc,params));
         nowBlock.push_back(new BitcastInst(destReg,nowBlock,bitcastReg));
         //然后一个for循环
         if (currentDim!= idxNodes.size()-1){
@@ -949,7 +972,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             IrFunc mallocFunc = getFunc("malloc");
             Register callReg = new Register(new LlvmPointerType(new LlvmIntegerType(8,false)),nowFunc.getMidRegName());
             ArrayList<Operand>params = new ArrayList<>();
-            params.add(new IntegerConst(64,false,type.getSize()));
+            params.add(new IntegerConst(64,false,type.getAlignSize()));
             CallInst callInst = new CallInst(callReg,nowBlock,mallocFunc,params);
             Register bitCastReg = new Register(new LlvmPointerType(type),nowFunc.getMidRegName());
             BitcastInst bitcastInst = new BitcastInst(bitCastReg,nowBlock,callReg);

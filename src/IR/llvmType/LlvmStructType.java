@@ -21,8 +21,10 @@ public class LlvmStructType extends LlvmAggregateType{
         memberNames.add(memberName);
 //        memberSize.add(member.getSize());
 //        size+=member.getSize();
-        memberSize.add(4);
-        size+=4;
+        memberSize.add(member.getAlignSize());
+        size+=member.getAlignSize();
+//        memberSize.add(4);
+//        size+=4;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class LlvmStructType extends LlvmAggregateType{
 
     @Override
     public int getAlignSize() {
-        return 0;
+        return size;
     }
 
     public int getIndex(String memberName){
