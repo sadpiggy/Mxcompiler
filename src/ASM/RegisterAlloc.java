@@ -18,7 +18,7 @@ public class RegisterAlloc {
     public void foolishAlloc(){
         ArrayList<PhysicalReg> registers = new ArrayList<>();//asmFunc.registers
         for (var it : asmFunc.registers){
-            if (it.isVirtual||it.isAddress){
+            if (it.isVirtual){
                 registers.add(it);
             }
         }
