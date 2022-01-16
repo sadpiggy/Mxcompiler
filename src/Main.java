@@ -54,7 +54,7 @@ public class Main{
                 //codegen
                 AsmRoot asmRoot = new AsmRoot();
                 InstSelector instSelector = new InstSelector(irFirstPass,asmRoot);
-//           // System.out.println("skdf");
+//           // System.out.println("skdf");//
                 instSelector.run();
                 asmRoot.regsAlloc();
                 if (!isLocal)
