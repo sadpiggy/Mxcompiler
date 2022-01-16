@@ -11,6 +11,7 @@ public class ITypeInst extends asmInst{
     }
     private PhysicalReg t0 = new PhysicalReg("t0","cnm");
     private PhysicalReg t1 = new PhysicalReg("t1","cnm");
+    private PhysicalReg t2 = new PhysicalReg("t2","cnm");
 
     public Imm imm;
     public ITypeOp op;
@@ -27,6 +28,13 @@ public class ITypeInst extends asmInst{
     public String toString() {
 
         StringBuilder stringBuilder = new StringBuilder();
+
+        if (!imm.isValidImm()){//只会出现在sw (100)s0,addi sp 100
+            stringBuilder.append( "\tli " + t2 + ", " + imm + "\n");
+            stringBuilder.append("\t" + "add" + " " + rd + ", " + rs1 + ", " + t2);
+            return stringBuilder.toString();
+        }
+
         if (rs1.isAddress){
            stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
            rs1 = t1;

@@ -2,6 +2,7 @@ package ASM.AsmInst;
 
 import ASM.AsmBlock;
 import ASM.AsmOperand.Imm;
+import ASM.AsmOperand.IntegerImm;
 import ASM.AsmOperand.PhysicalReg;
 import ASM.AsmOperand.VirtualReg;
 
@@ -10,6 +11,7 @@ public class StoreInst extends asmInst{
         sb,sw
     }
     private PhysicalReg t1 = new PhysicalReg("t1","cnm");
+    private PhysicalReg t2 = new PhysicalReg("t2","cnm");
 
     public Imm offset;
     StoreTypeOp op;
@@ -29,7 +31,13 @@ public class StoreInst extends asmInst{
             stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs2.toString() + "(s0)\n");
             rs2 = t1;
         }
-        stringBuilder.append("\t" + op + " " + rs2 + ", " + offset + "(" + rs1 + ")");
+        if (offset.isValidImm()) {
+            stringBuilder.append("\t" + op + " " + rs2 + ", " + offset + "(" + rs1 + ")");
+        }else {
+            stringBuilder.append( "\tli " + t2 + ", " + offset + "\n");
+            stringBuilder.append("\t" + "sub" + " " + t2 + ", " + rs1 + ", " + t2);
+            stringBuilder.append("\t" + op + " " + rs2 + ", " + new IntegerImm(0) + "(" + t2 + ")");
+        }
         return stringBuilder.toString();
     }
 }

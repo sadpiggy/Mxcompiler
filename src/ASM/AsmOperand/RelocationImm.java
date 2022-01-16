@@ -25,4 +25,9 @@ public class RelocationImm extends Imm {
         //if (physicalReg!=null&&type==Type.lo)return "%" + type + "(" + dataName + ")(" + physicalReg.toString() + ")";
         return "%" + type + "(" + dataName + ")";
     }
+
+    @Override
+    public boolean isValidImm() {
+        return true;
+    }
 }

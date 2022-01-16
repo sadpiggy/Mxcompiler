@@ -162,10 +162,20 @@ public class InstSelector {//构造函数那里有bug
         //s0 - offset
         //currentAsmFunc.stackSize = 8;
         currentAsmFunc.stackSize = 52;
+
+        int overflowSize = 0;
+
         if (irFunc.formParams!=null&&irFunc.formParams.size()!=0){
             for (int i=0;i<irFunc.formParams.size();i++){
-                Register register = irFunc.formParams.get(i);
-                currentAsmFunc.setPhyReg(new PhysicalReg("a"+i, register.name));
+                if (i<=7){//
+                    Register register = irFunc.formParams.get(i);
+                    currentAsmFunc.setPhyReg(new PhysicalReg("a"+i, register.name));
+                }else {
+                    Register register = irFunc.formParams.get(i);
+                    currentAsmFunc.setPhyReg(new PhysicalReg(register.name,overflowSize));
+                    overflowSize+=4;
+                }
+
             }
         }
 
@@ -308,7 +318,7 @@ public class InstSelector {//构造函数那里有bug
     }
 
     public void visitCallInst(CallInst inst) {
-        //之后考虑溢出
+        //之后考虑溢出//考虑溢出
 
         int size3,size4,size5,size6;
         currentAsmFunc.changeStackSize();size3 = currentAsmFunc.stackSize;
@@ -320,11 +330,22 @@ public class InstSelector {//构造函数那里有bug
         currentAsmFunc.changeStackSize();size6 = currentAsmFunc.stackSize;
         currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t6,sp));
 
+        int overflowSize = 0;
+
         if (inst.params!=null&&inst.params.size()!=0){
             for (int i=0;i<inst.params.size();i++){
-                Operand operand = inst.params.get(i);
-                PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.registers.size(),true);
-                currentAsmBlock.push_back(new MoveInst(currentAsmBlock,new PhysicalReg("a"+i,"cnm"),physicalReg));
+                if (i<=7){
+                    Operand operand = inst.params.get(i);
+                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.registers.size(),true);//
+                    currentAsmBlock.push_back(new MoveInst(currentAsmBlock,new PhysicalReg("a"+i,"cnm"),physicalReg));
+                }else {
+                    currentAsmFunc.changeStackSize();
+                    PhysicalReg addressReg = new PhysicalReg("overflowA"+i,overflowSize);
+                    overflowSize+=4;
+                    Operand operand = inst.params.get(i);
+                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.registers.size(),true);//
+                    currentAsmBlock.push_back(new MoveInst(currentAsmBlock,addressReg,physicalReg));
+                }
                 //getPhysicalReg(operand,new PhysicalReg("a"+i),false,0);
             }
         }

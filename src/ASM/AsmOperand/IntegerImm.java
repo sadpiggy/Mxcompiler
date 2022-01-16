@@ -11,5 +11,6 @@ public class IntegerImm extends Imm {
         return String.valueOf(value);
     }
 
+    @Override
     public boolean isValidImm() {return - ((1 << 11) - 1) <= value && value <= (1 << 11) - 1;}
 }
