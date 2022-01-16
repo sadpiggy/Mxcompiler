@@ -66,7 +66,7 @@ public class Main{
                 asmRoot.printAsm(System.out);
 
                 //irFirstPass.printIr();
-                //sdjsjl
+                //sdjs
             }
 
         } catch (Errormy er) {
