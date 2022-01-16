@@ -22,7 +22,7 @@ import java.util.Objects;
 
 public class Main{
     public static void main(String[] args) throws Exception{
-        boolean isLocal = true;
+        boolean isLocal = false;
         boolean semanticOnly = args.length > 0 && args[0].equals("--semantic_only");
         String name = "testcases/testcase/myTest.mx";
         InputStream input = null;
@@ -54,7 +54,7 @@ public class Main{
                 //codegen
                 AsmRoot asmRoot = new AsmRoot();
                 InstSelector instSelector = new InstSelector(irFirstPass,asmRoot);
-//           // System.out.println("skdf");//
+//           // System.out.println("skdf");
                 instSelector.run();
                 asmRoot.regsAlloc();
                 if (!isLocal)
@@ -65,7 +65,7 @@ public class Main{
 
                 asmRoot.printAsm(System.out);
 
-                irFirstPass.printIr();
+                //irFirstPass.printIr();
                 //sdjs
             }
 

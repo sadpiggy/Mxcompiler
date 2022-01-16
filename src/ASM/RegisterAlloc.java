@@ -26,6 +26,7 @@ public class RegisterAlloc {
         boolean value = true;
         while (value){
             value = deleteNode(registers);
+            //System.out.println("ml");
         }
         for (var it : registers){
             allocSingle(it);

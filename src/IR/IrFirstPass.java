@@ -25,6 +25,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public Const nowConst;
     public LlvmStructType nowStruct;
     public boolean isInClass;
+    public LlvmStructType inClassStruct;
     public IrFunc nowFunc;
     public ScopeForBuild nowScope;
     //public int nowRegisterNum;//for func?need? nowFunc.getReg
@@ -50,6 +51,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowConst = null;
         nowScope = null;
         nowStruct = null;
+        inClassStruct = null;
         nowFunc = null;
         isInClass = false;
         //nowRegister = null;
@@ -207,8 +209,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     }
 
     public Operand getVar(String name){
-        if (isInClass)return getVar_inClass(name);
-        else return getVar_notInClass(name);
+        if (isInClass){//System.out.println(name);
+            return getVar_inClass(name);
+        } else return getVar_notInClass(name);
     }
 
     public Operand getVar_notInClass(String name){//只在inclass==false时可以用
@@ -229,9 +232,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         LlvmSingleValueType memberType = nowStruct.getMemberType(name);
         if (memberType instanceof LlvmPointerType){
             if (((LlvmPointerType) memberType).pointeeType instanceof LlvmStructType){
-                //nowStruct = (LlvmStructType) (((LlvmPointerType) memberType).pointeeType);
                 register.typeName = ((LlvmStructType) (((LlvmPointerType) memberType).pointeeType)).structName;
-                //System.out.println(nowStruct);
             }
         }
         nowBlock.push_back(new GetElementPtrInst(register,nowBlock,thisReg,indexs));
@@ -240,12 +241,19 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             Register loadReg = new Register((LlvmSingleValueType) ((LlvmPointerType)(nowOperand.type)).pointeeType,nowFunc.getMidRegName());
             nowBlock.push_back(new LoadInst(loadReg,nowBlock,nowOperand));
             nowOperand = loadReg;
+            nowOperand.typeName = register.typeName;
         }
     }
 
     public Operand getVar_inClass(String name){
         AstNode node = nowScope.getNode(name);
-        if (node!=null)return node.operand;
+        if (node!=null){return node.operand;}
+        if (!nowStruct.containMember(name)){
+//            System.out.println(name);
+//            System.out.println(nowStruct);
+//            System.out.println(inClassStruct);
+            nowStruct = inClassStruct;
+        }
         if(nowStruct.containMember(name)){
             ArrayList<Operand>indexs = new ArrayList<>();
             indexs.add(new IntegerConst(32,false,0));
@@ -254,7 +262,11 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             nowBlock.push_back(new LoadInst(thisReg,nowBlock,new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this")));
             Register register = new Register(new LlvmPointerType(nowStruct.getMemberType(name)),nowFunc.getMidRegName());
             nowBlock.push_back(new GetElementPtrInst(register,nowBlock,thisReg,indexs));
+            register.typeName = nowStruct.getMemberTypeName(name);
             nowOperand = register;
+//            System.out.println(name);
+//            System.out.println(nowFunc);
+//            System.out.println(register.typeName);
             return register;
         }
         return getGlobalVar(name);
@@ -330,10 +342,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     //class之后要大改，先放着
     public void visitClassFirst(ClassDefNode classDefNode){
         nowStruct = getStruct(classDefNode.getIdentifier());
+        inClassStruct = nowStruct;
+        //System.out.println(nowStruct);
         for(var it : classDefNode.getMembers()){
             LlvmSingleValueType member = null;
             member = (LlvmSingleValueType) getLlvmType(it.getTypeNode());
-            nowStruct.addMember(it.getIdentifier(),member);
+            nowStruct.addMember(it.getIdentifier(),member,it.getTypeNode().type_name);
         }
         for(var it : classDefNode.getMethods()){
             visitFuncFirst((FuncDefNode) it,nowStruct.structName + "_" + it.getIdentifier(),true);
@@ -347,7 +361,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         if (isMethod){
             formParams = new ArrayList<>();
             //这个，名字得改之后//todo
-            Register formParam = new Register(new LlvmPointerType(nowStruct),"param_"+"this");
+            Register formParam = new Register(new LlvmPointerType(inClassStruct),"param_"+"this");
             //nowRegisterNum++;
             formParams.add(formParam);
             if (funcDefNode.getParamList()!=null&&funcDefNode.getParamList().size()!=0){
@@ -710,11 +724,11 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }
 
         if (isInClass){
-            LlvmPointerType itType = new LlvmPointerType(nowStruct);
+            LlvmPointerType itType = new LlvmPointerType(inClassStruct);
             Register register = new Register(new LlvmPointerType(itType),"paramin_"+"this");
             AllocInst allocInst = new AllocInst(itType,register,nowFunc.headBlock);
             nowFunc.headBlock.push_back(allocInst);
-            StoreInst storeInst = new StoreInst(nowBlock,new Register(new LlvmPointerType(nowStruct),"param_"+"this"),register);
+            StoreInst storeInst = new StoreInst(nowBlock,new Register(new LlvmPointerType(inClassStruct),"param_"+"this"),register);
             nowBlock.push_back(storeInst);
             //nowScope.addNode(it.getIdentifier(),it);
         }
@@ -752,8 +766,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     @Override
     public void visit(IdExprNode node) {//正常情况下，全局已经处理过了。int a = 5;先将a放入headBlock,然后
         node.operand = getVar(node.getIdentifier());
-//        if (node.getType()==null){
-//            System.out.println("null");
+//        if (node.operand==null){
+//            System.out.println(node.getIdentifier());
 //        }
         if (node.operand.typeName==null)
         node.operand.typeName = node.getType().typeName;
@@ -996,6 +1010,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             if (isStruct){
                 ArrayList<Operand>paramsConstruct = new ArrayList<>();
                 paramsConstruct.add(nowOperand);
+
                 nowBlock.push_back(new CallInst(nowBlock,getFunc(name+"_" +name),paramsConstruct));
             }
         }else {//a = new int;//这个我现在的体系解决不了 //new pig //new pig[10]
@@ -1019,6 +1034,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         for (var it : node.getProgramSectionNodeList()){
             if (it instanceof ClassDefNode){
                 nowStruct = getStruct(((ClassDefNode) it).getIdentifier());
+                inClassStruct = nowStruct;
                 isInClass = true;
                 for(var method : ((ClassDefNode) it).getMethods()){
                     nowFunc = getFunc(((ClassDefNode) it).getIdentifier()+"_"+method.getIdentifier());

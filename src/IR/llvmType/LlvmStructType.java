@@ -8,6 +8,7 @@ import java.util.Objects;
 public class LlvmStructType extends LlvmAggregateType{
     public ArrayList<LlvmSingleValueType>members = new ArrayList<>();
     public ArrayList<String>memberNames = new ArrayList<>();
+    public ArrayList<String>memberTypeNames = new ArrayList<>();
     public ArrayList<Integer>memberSize = new ArrayList<>();
     public String structName;
     public int size = 0;
@@ -16,8 +17,9 @@ public class LlvmStructType extends LlvmAggregateType{
         this.structName = structName;
     }
 
-    public void addMember(String memberName,LlvmSingleValueType member){
+    public void addMember(String memberName,LlvmSingleValueType member,String memberTypeName){
         members.add(member);
+        memberTypeNames.add(memberTypeName);
         memberNames.add(memberName);
 //        memberSize.add(member.getSize());
 //        size+=member.getSize();
@@ -85,5 +87,12 @@ public class LlvmStructType extends LlvmAggregateType{
         return null;
         //System.out.println("llStruct 50");
         //return 0;
+    }
+
+    public String getMemberTypeName(String memberName){
+        for(int i=0;i<memberNames.size();i++){
+            if (Objects.equals(memberName, memberNames.get(i)))return memberTypeNames.get(i);
+        }
+        return null;
     }
 }

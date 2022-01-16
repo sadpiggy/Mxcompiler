@@ -1,90 +1,131 @@
 /*
 Test Package: Codegen
-Author: Yuncong Hu
-Time: 2020-02-02
+Author: YifanXu
+Time: 2020-04-09
 Input:
 === input ===
-5
-5
-ABCDE
-1
-2
-3
-4
-5
+4 5
+1 2 2
+1 3 2
+1 4 3
+2 3 4
+3 4 3
 === end ===
 Output:
 === output ===
-5 E
-10
+7
 === end ===
 ExitCode: 0
 InstLimit: -1
-Origin Package: Codegen Pretest-556
 */
 
-//考察点：section 9 函数，包括函数定义，内建函数
-//算法：斜堆
-//样例输入：
-//5 5
-//ABCDE
-//1 2 3 4 5
-//样例输出：
-//5 E
-//10
-int N;
-int M;
-string ch;
 
-int[] l;
-int[] r;
-int[] w;
+class Edge {
+	int x;
+	int y;
+	int w;
+};
 
-int merge(int x,int y)
+int n;
+int m;
+int ans = 0;
+int[] fa;
+int[] rk;
+Edge[] e;
+
+
+void qsort(Edge[] e, int l, int r)
 {
-	if (0 == x) return y;
-	if (0 == y) return x;
-	if (w[x] < w[y]) {
-		int e = x;
-		x = y;
-		y = e;
+	if (l < r)
+	{
+		int i = l;
+        int j = r;
+        Edge x = e[l];
+		while (i < j)
+		{
+			while(i < j && e[j].w >= x.w) {
+				j--;
+            }
+			if (i < j) {
+				e[i] = e[j];
+                i++;
+            }
+			while(i < j && e[i].w < x.w) {
+				i++;
+            }
+			if (i < j) {
+				e[j] = e[i];
+                j--;
+            }
+		}
+		e[i] = x;
+		qsort(e, l, i - 1);
+		qsort(e, i + 1, r);
 	}
-	r[x] = merge(r[x],y);
-	int e = l[x];
-	l[x] = r[x];
-	r[x] = e;
-	return x;
 }
 
-int main()
-{
-	N = getInt();
-	M = getInt();
-	ch = getString();
-	l = new int[N+M+5];
-	r = new int[N+M+5];
-	w = new int[N+M+5];
+void init() {
+    fa = new int[n + 1];
+    rk = new int[n + 1];
 	int i;
-	for (i=1;i <= N;i++) {
-		w[i] = getInt();
-		l[i] = 0;
-   		r[i] = 0;
+    for (i = 1; i <= n; ++i) {
+		fa[i] = i;
+		rk[i] = 1;
 	}
-	for (i=1;i <= M;i++) {
-		w[i + N] = ch.ord(i-1);
-		l[i + N] = 0;
-		r[i + N] = 0;
+}
+
+int find(int x) {
+	if (x == fa[x]) return x;
+	x = find(fa[x]);
+	return fa[x];
+}
+
+bool union(int x, int y) {
+	x = find(x);
+	y = find(y);
+	if (x == y) return false;
+	if (rk[x] > rk[y]) {
+		fa[y] = x;
+		rk[x] = rk[x] + rk[y];
+	} else {
+		fa[x] = y;
+		rk[y] = rk[y] + rk[x];
 	}
-	int rt0 = 1;
-	int rt1 = N + 1;
-	for (i = 2;i <= N;i++)
-		rt0 = merge(rt0,i);
-	for (i = N+2;i<= N+M;i++)
-		rt1 = merge(rt1,i);
-	print(toString(w[rt0]));
-	print(" ");
-	print(ch.substring(rt1-N-1,rt1-N));
-	print("\n");
-	println(toString(merge(rt0,rt1)));
+	return true;
+}
+
+int main() {
+    n = getInt();
+    m = getInt();
+    e = new Edge[m];
+    int i;
+	for (i = 0; i < m; ++i) {
+        Edge ed = new Edge;
+        ed.x = getInt();
+        ed.y = getInt();
+        ed.w = getInt();
+		e[i] = ed;
+	}
+    qsort(e, 0, m - 1);
+	init();
+	i = 0;
+    int j = 0;
+	while (i < n - 1) {
+		if (j >= m) {
+			printInt(-1);
+			return 0;
+		}
+        Edge ed = e[j];
+		++j;
+		if (union(ed.x, ed.y)) {
+			++i;
+			ans = ans + ed.w;
+		}
+	}
+	if (rk[find(1)] == n) {
+        printInt(ans);
+    } else {
+        printInt(-1);
+    }
 	return 0;
 }

@@ -45,6 +45,21 @@ public class InstSelector {//构造函数那里有bug
     public PhysicalReg t0;
     public PhysicalReg t1;
     public PhysicalReg t2;
+    public PhysicalReg s1 = new PhysicalReg("s1","cs1");
+    public PhysicalReg s2 = new PhysicalReg("s2","cs2");
+    public PhysicalReg s3 = new PhysicalReg("s3","cs3");
+    public PhysicalReg s4 = new PhysicalReg("s4","cs4");
+    public PhysicalReg s5 = new PhysicalReg("s5","cs5");
+    public PhysicalReg s6 = new PhysicalReg("s6","cs6");
+    public PhysicalReg s7 = new PhysicalReg("s7","cs7");
+    public PhysicalReg s8 = new PhysicalReg("s8","cs8");
+    public PhysicalReg s9 = new PhysicalReg("s9","cs9");
+    public PhysicalReg s10 = new PhysicalReg("s10","cs10");
+    public PhysicalReg s11 = new PhysicalReg("s11","cs11");
+    public PhysicalReg t3 = new PhysicalReg("t3","ct3");;
+    public PhysicalReg t4 = new PhysicalReg("t4","ct4");;
+    public PhysicalReg t5 = new PhysicalReg("t5","ct5");;
+    public PhysicalReg t6 = new PhysicalReg("t6","ct6");;
 
 
     public InstSelector(IrFirstPass irFirstPass,AsmRoot asmRoot){
@@ -145,7 +160,8 @@ public class InstSelector {//构造函数那里有bug
     //参数不能直接溢出，因为 有内建的
     public void visitIrFunc(IrFunc irFunc){
         //s0 - offset
-        currentAsmFunc.stackSize = 8;
+        //currentAsmFunc.stackSize = 8;
+        currentAsmFunc.stackSize = 52;
         if (irFunc.formParams!=null&&irFunc.formParams.size()!=0){
             for (int i=0;i<irFunc.formParams.size();i++){
                 Register register = irFunc.formParams.get(i);
@@ -170,6 +186,19 @@ public class InstSelector {//构造函数那里有bug
         currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-8),s0,sp));
         currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-4),ra,sp));
 
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-12),s1,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-16),s2,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-20),s3,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-24),s4,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-28),s5,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-32),s6,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-36),s7,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-40),s8,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-44),s9,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-48),s10,sp));
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-52),s11,sp));
+
+
 //        currentAsmBlock = currentAsmFunc.blocks.get(currentAsmFunc.blocks.size()-1);
 //        currentAsmBlock.insts.removeLast();
   //      currentAsmBlock.push_back(new JInst(currentAsmBlock, tailBlock.name));
@@ -179,6 +208,19 @@ public class InstSelector {//构造函数那里有bug
         currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,sp,sp,new IntegerImm(currentAsmFunc.stackSize)));
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s0,sp,new IntegerImm(-8)));
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,ra,sp,new IntegerImm(-4)));
+
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s1,sp,new IntegerImm(-12)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s2,sp,new IntegerImm(-16)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s3,sp,new IntegerImm(-20)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s4,sp,new IntegerImm(-24)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s5,sp,new IntegerImm(-28)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s6,sp,new IntegerImm(-32)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s7,sp,new IntegerImm(-36)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s8,sp,new IntegerImm(-40)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s9,sp,new IntegerImm(-44)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s10,sp,new IntegerImm(-48)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s11,sp,new IntegerImm(-52)));
+
         currentAsmBlock.push_back(new ASM.AsmInst.RetInst(currentAsmBlock));
         currentAsmFunc.setBlock(tailBlock);
     }
@@ -267,6 +309,17 @@ public class InstSelector {//构造函数那里有bug
 
     public void visitCallInst(CallInst inst) {
         //之后考虑溢出
+
+        int size3,size4,size5,size6;
+        currentAsmFunc.changeStackSize();size3 = currentAsmFunc.stackSize;
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t3,s0));
+        currentAsmFunc.changeStackSize();size4 = currentAsmFunc.stackSize;
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t4,s0));
+        currentAsmFunc.changeStackSize();size5 = currentAsmFunc.stackSize;
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t5,sp));
+        currentAsmFunc.changeStackSize();size6 = currentAsmFunc.stackSize;
+        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t6,sp));
+
         if (inst.params!=null&&inst.params.size()!=0){
             for (int i=0;i<inst.params.size();i++){
                 Operand operand = inst.params.get(i);
@@ -276,6 +329,12 @@ public class InstSelector {//构造函数那里有bug
             }
         }
         currentAsmBlock.push_back(new ASM.AsmInst.CallInst(currentAsmBlock,inst.callee.name));
+
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t3,s0,new IntegerImm(-size3)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t4,s0,new IntegerImm(-size4)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t5,s0,new IntegerImm(-size5)));
+        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t6,s0,new IntegerImm(-size6)));
+
         if (inst.destReg!=null){
             Register register = (Register) inst.destReg;
             PhysicalReg physicalReg = getPhysicalReg(register,true,0,false);
@@ -290,6 +349,7 @@ public class InstSelector {//构造函数那里有bug
             IntegerConst integerConst = (IntegerConst) operand;
             LlvmStructType llvmStructType = (LlvmStructType) ((LlvmPointerType) inst.pointer.type).pointeeType;
             int index = llvmStructType.getIndexAlign(integerConst.value);
+            //System.out.println(index);
             PhysicalReg pointer = getPhysicalReg(inst.pointer,false,dest.liveStart,true);
             currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,dest,pointer,new IntegerImm(index)));
         }else {//数组

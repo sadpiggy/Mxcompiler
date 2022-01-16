@@ -13,7 +13,7 @@ public class LlvmPointerType extends LlvmSingleValueType{
     }
 
 
-    private int alignSize = 8;
+    private int alignSize = 4;
 
     @Override
     public int getSize() {
