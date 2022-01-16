@@ -20,13 +20,14 @@ public class ConflictAnalise {
 
         for (int i=0;i< registers.size();i++){
             PhysicalReg phyI = registers.get(i);
-            for (int j=0;j< registers.size();j++){
+            for (int j=i+1;j< registers.size();j++){
                 //System.out.println(phyI.);
                 PhysicalReg phyJ = registers.get(j);
                 if (phyI.isVirtual&&phyJ.isVirtual){
                     //System.out.println("gi");
                     if (!(phyI.liveEnd<phyJ.liveStart||phyI.liveStart>phyJ.liveEnd)){
                         phyI.conflictRegs.push(phyJ);
+                        phyJ.conflictRegs.push(phyI);
                     }
                 }
             }

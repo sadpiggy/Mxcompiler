@@ -3,6 +3,7 @@ package ASM;
 import ASM.AsmOperand.PhysicalReg;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -38,9 +39,12 @@ public class RegisterAlloc {
         boolean value = false;
         ArrayList<PhysicalReg>deleteList = new ArrayList<>();
         for (var it : registers){
-           // System.out.println("nmsl");
             if (it.conflictRegs.size()<allocRegSize){
-                for (var reg : it.conflictRegs)reg.deleteConflict(it);
+                for (var reg : it.conflictRegs){
+                    if (reg.conflictRegs.contains(it)){
+                        reg.deleteConflict(it);
+                    }
+                }
                 regStack.push(it);
                 //registers.remove(it);
                 deleteList.add(it);

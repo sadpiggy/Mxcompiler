@@ -657,7 +657,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowFunc.setBlock(nextBlock);
         nowBlock = nextBlock;
         loopCondBlock = oldCondBlock;
-        loopNextBlock = nextBlock;
+        loopNextBlock = oldNextBlock;
     }
 
     @Override
@@ -1056,6 +1056,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             nowConst = getStringConst(node.getValue());
         }
         node.operand = nowConst;
+        nowConst.typeName = "string";
         nowOperand = nowConst;
     }
 

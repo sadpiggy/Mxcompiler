@@ -12,13 +12,16 @@ public class LlvmPointerType extends LlvmSingleValueType{
         return pointeeType.toString() + "*";
     }
 
+
+    private int alignSize = 8;
+
     @Override
     public int getSize() {
-        return 4;
+        return alignSize;
     }
 
     @Override
     public int getAlignSize() {
-        return 4;
+        return alignSize;
     }
 }
