@@ -36,7 +36,7 @@ public class StoreInst extends asmInst{
         }else {
             stringBuilder.append( "\tli " + t2 + ", " + offset + "\n");
             stringBuilder.append("\t" + "sub" + " " + t2 + ", " + rs1 + ", " + t2);
-            stringBuilder.append("\t" + op + " " + rs2 + ", " + new IntegerImm(0) + "(" + t2 + ")");
+            stringBuilder.append("\n\t" + op + " " + rs2 + ", " + new IntegerImm(0) + "(" + t2 + ")");
         }
         return stringBuilder.toString();
     }

@@ -92,6 +92,14 @@ la li 没有用过
 size 为什么是-10??
 size重新安排，bool也4byte,但是print IR 里面依然看做i1,align 1
 valid imm加载到寄存器里
+1/16
+bug:callerSave calleeSave
+我写的是什么瘠薄，为什么有换行就
+terminate called after throwing an instance of 'ravel::InvalidAddress'
+  what():  20000c8c
+Aborted
+我不理解
+class 内部调用
 
 基本架构设计:
 需要一个装载inst的数组，里面装着指令；需要一个符号表，里面装着变量和类型的信息，包括地址，大小，值？

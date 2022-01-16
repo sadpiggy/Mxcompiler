@@ -682,7 +682,16 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(FuncCallExprNode node) {
-        IrFunc callFunc = getFunc(node.getIdentifier());
+        IrFunc callFunc = null;
+        if (isInClass){
+            callFunc = getFunc(inClassStruct.structName+"_"+node.getIdentifier());
+        }
+        if (callFunc==null)callFunc = getFunc(node.getIdentifier());
+
+//        if (callFunc==null){
+//            System.out.println(node.getIdentifier());
+//        }
+        if (callFunc!=null)
         callFunc.isUsed = true;
         ArrayList<Operand>realParams = null;
         if (node.getParams()!=null&&node.getParams().size()!=0){//忘记之前怎么处理的了，只能冗余一下了
@@ -864,7 +873,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }
         //System.out.println(nowOperand.typeName);
         IrFunc callFunc = getFunc(nowOperand.typeName+"_"+node.getMethodName());
-        if (callFunc==null)System.out.println(nowOperand.typeName+"_"+node.getMethodName());
+        //if (callFunc==null)System.out.println(nowOperand.typeName+"_"+node.getMethodName());
+        if (callFunc!=null)
         callFunc.isUsed = true;
         ArrayList<Operand>realParams = new ArrayList<>();
         realParams.add(nowOperand);

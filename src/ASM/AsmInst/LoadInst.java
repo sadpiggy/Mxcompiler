@@ -2,6 +2,7 @@ package ASM.AsmInst;
 
 import ASM.AsmBlock;
 import ASM.AsmOperand.Imm;
+import ASM.AsmOperand.IntegerImm;
 import ASM.AsmOperand.PhysicalReg;
 import ASM.AsmOperand.VirtualReg;
 
@@ -11,6 +12,7 @@ public class LoadInst extends asmInst{
     }
     private PhysicalReg t0 = new PhysicalReg("t0","cnm");
     private PhysicalReg t1 = new PhysicalReg("t1","cnm");
+    private PhysicalReg t2 = new PhysicalReg("t2","cnm");
 
     public Imm imm;
     public LoadTypeOp op;
@@ -35,6 +37,12 @@ public class LoadInst extends asmInst{
             stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)");
             return stringBuilder.toString();
         }
-        return stringBuilder.append("\t" + op + " " + rd + ", " + imm + "(" + rs1 + ")").toString();
+        if (imm.isValidImm()) {
+            return stringBuilder.append("\t" + op + " " + rd + ", " + imm + "(" + rs1 + ")").toString();
+        }else {
+            stringBuilder.append( "\tli " + t2 + ", " + imm + "\n");
+            stringBuilder.append("\t" + "sub" + " " + t2 + ", " + rs1 + ", " + t2);
+            return stringBuilder.append("\n\t" + op + " " + rd + ", " + new IntegerImm(0) + "(" + t2 + ")").toString();
+        }
     }
 }
