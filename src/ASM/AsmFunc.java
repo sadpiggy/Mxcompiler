@@ -379,8 +379,8 @@ public class AsmFunc {
                             "\tlw\tra, 28(sp)\n" +
                             "\taddi\tsp, sp, 32\n" +
                             "\tret\n" +
-                            ".Lfunc_end0:\n" +
-                            "\t.size\tstring_substring, .Lfunc_end0-string_substring\n" +
+                            ".Lfunc_endsub0:\n" +
+                            "\t.size\tstring_substring, .Lfunc_endsub0-string_substring\n" +
                             "\t.cfi_endproc\n" +
                             "                                        # -- End function");
                     break;

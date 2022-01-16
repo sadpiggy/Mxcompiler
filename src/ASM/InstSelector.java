@@ -2,6 +2,7 @@ package ASM;
 
 import ASM.AsmInst.*;
 import ASM.AsmOperand.*;
+import AST.NullContainNode;
 import IR.IrBlock;
 import IR.IrFirstPass;
 import IR.IrFunc;
@@ -95,6 +96,8 @@ public class InstSelector {//构造函数那里有bug
             currentAsmBlock.push_back(new LuiInst(currentAsmBlock,physicalReg,new RelocationImm(RelocationImm.Type.hi,stringConst.name)));
             currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,physicalReg,physicalReg,new RelocationImm(RelocationImm.Type.lo,stringConst.name)));
             return physicalReg;
+        }else if (operand instanceof NullPointerConst){
+           return zero;
         }else {
             GlobalOperand globalOperand = (GlobalOperand) operand;
             if (isLeft){

@@ -371,6 +371,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }
         //if (formParams!=null)System.out.println("???");
         IrFunc irFunc = new IrFunc((LlvmSingleValueType) getLlvmType(funcDefNode.getTypeNode()),funcName,formParams,false);
+        irFunc.typeName = funcDefNode.getTypeNode().type_name;
         funcs.add(irFunc);
     }
 
@@ -427,6 +428,11 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         isLeft = false;
         node.getrExpr().acceptVisitor(this);
         Operand rOp = nowOperand;
+//        if (!Objects.equals(rOp.type.toString(), ((LlvmPointerType) (lOp.type)).pointeeType.toString())){
+//            Register bitcastReg = new Register(new LlvmPointerType(rOp.type),nowFunc.getMidRegName());
+//            nowBlock.push_back(new BitcastInst(bitcastReg,nowBlock,lOp));
+//            lOp = bitcastReg;
+//        }
         StoreInst inst = new StoreInst(nowBlock,rOp,lOp);
         nowBlock.push_back(inst);
     }
@@ -746,6 +752,11 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     @Override
     public void visit(IdExprNode node) {//正常情况下，全局已经处理过了。int a = 5;先将a放入headBlock,然后
         node.operand = getVar(node.getIdentifier());
+//        if (node.getType()==null){
+//            System.out.println("null");
+//        }
+        if (node.operand.typeName==null)
+        node.operand.typeName = node.getType().typeName;
         if (isLeft){
             nowOperand = node.operand;
             return;
@@ -834,10 +845,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             nowBlock.push_back(new BitcastInst(sizeAddress,nowBlock,oralAddress));
             nowBlock.push_back(new LoadInst(arraySize,nowBlock,sizeAddress));
             nowOperand = arraySize;
+            nowOperand.typeName = "int";
             return;
         }
         //System.out.println(nowOperand.typeName);
         IrFunc callFunc = getFunc(nowOperand.typeName+"_"+node.getMethodName());
+        if (callFunc==null)System.out.println(nowOperand.typeName+"_"+node.getMethodName());
         callFunc.isUsed = true;
         ArrayList<Operand>realParams = new ArrayList<>();
         realParams.add(nowOperand);
@@ -854,12 +867,13 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             if (Objects.equals(callFunc.name, "getString")|| Objects.equals(callFunc.name, "toString")|| Objects.equals(callFunc.name, "string_substring")|| Objects.equals(callFunc.name, "string_add")){
                 nowOperand.typeName = "string";
                 //System.out.println("ll");
-            }
+            }else {nowOperand.typeName = callFunc.typeName;}
             inst = new CallInst(nowOperand,nowBlock,callFunc,realParams);
         }else {
             //System.out.println(callFunc.type.toString());
             inst = new CallInst(nowBlock,callFunc,realParams);
         }
+        //nowOperand.typeName = callFunc.typeName;
         nowBlock.push_back(inst);
     }
 

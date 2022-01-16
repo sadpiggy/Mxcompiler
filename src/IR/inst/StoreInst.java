@@ -24,6 +24,7 @@ public class StoreInst extends Inst{//之后可能还要添加user def链
 
     @Override
     public String toString() {
-        return "store " + value.type.toString() + " " + value.toString() + ", " + pointer.type.toString() + " " + pointer.toString()+ ", align " + alignSize;
+        //return "store " + value.type.toString() + " " + value.toString() + ", " + pointer.type.toString() + " " + pointer.toString()+ ", align " + alignSize;
+        return "store " + ((LlvmPointerType)(pointer.type)).pointeeType.toString() + " " + value.toString() + ", " + pointer.type.toString() + " " + pointer.toString()+ ", align " + alignSize;
     }
 }
