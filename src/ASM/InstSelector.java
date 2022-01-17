@@ -320,15 +320,23 @@ public class InstSelector {//构造函数那里有bug
     public void visitCallInst(CallInst inst) {
         //之后考虑溢出//考虑溢出
 
-        int size3,size4,size5,size6;
+        int size3,size4,size5,size6,size0,size1,size2;
+
+//        currentAsmFunc.changeStackSize();size0 = currentAsmFunc.stackSize;
+//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t0,s0));
+//        currentAsmFunc.changeStackSize();size1 = currentAsmFunc.stackSize;
+//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t1,s0));
+//        currentAsmFunc.changeStackSize();size2 = currentAsmFunc.stackSize;
+//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t2,s0));
+
         currentAsmFunc.changeStackSize();size3 = currentAsmFunc.stackSize;
-        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t3,s0));
+        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t3,s0));
         currentAsmFunc.changeStackSize();size4 = currentAsmFunc.stackSize;
-        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t4,s0));
+        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t4,s0));
         currentAsmFunc.changeStackSize();size5 = currentAsmFunc.stackSize;
-        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t5,sp));
+        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t5,s0));
         currentAsmFunc.changeStackSize();size6 = currentAsmFunc.stackSize;
-        currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t6,sp));
+        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t6,s0));
 
         int overflowSize = 0;
 
@@ -350,6 +358,11 @@ public class InstSelector {//构造函数那里有bug
             }
         }
         currentAsmBlock.push_back(new ASM.AsmInst.CallInst(currentAsmBlock,inst.callee.name));
+
+
+      //  currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t0,s0,new IntegerImm(-size0)));
+        //currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t1,s0,new IntegerImm(-size1)));
+        //currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t2,s0,new IntegerImm(-size2)));
 
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t3,s0,new IntegerImm(-size3)));
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t4,s0,new IntegerImm(-size4)));

@@ -100,6 +100,8 @@ terminate called after throwing an instance of 'ravel::InvalidAddress'
 Aborted
 我不理解
 class 内部调用
+1/17
+之前偷过的懒，都将成为让我不敢再偷懒的教训——this指针之前为了方便，直接new Register("param_this"),但是两个应该相同的Register就不是一个reg了
 
 基本架构设计:
 需要一个装载inst的数组，里面装着指令；需要一个符号表，里面装着变量和类型的信息，包括地址，大小，值？

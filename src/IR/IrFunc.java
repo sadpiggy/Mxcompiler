@@ -22,6 +22,8 @@ public class IrFunc extends Operand{
     public IrBlock headBlock;
     public int nowMidRegNum;//m0
     public boolean isUsed;
+    public Register param_this;
+    public Register paramin_this;
     //public int nowRegisterNum;
    // public String formParamString;
     //public IrScope irScope;
@@ -38,6 +40,8 @@ public class IrFunc extends Operand{
         headBlock = null;
         nowMidRegNum = 0;
         isUsed = false;
+        param_this = null;
+        paramin_this = null;
         //this.nowRegisterNum = nowRegisterNum;
     }
 

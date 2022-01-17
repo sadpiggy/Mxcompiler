@@ -39,6 +39,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public IrBlock loopNextBlock;
     public IrBlock loopCondBlock;
     public ArrayList<AssignExprNode>globalInitNodes;
+
     // public IrBlock endBlock;
     //public String nowStructName;
 
@@ -249,9 +250,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         AstNode node = nowScope.getNode(name);
         if (node!=null){return node.operand;}
         if (!nowStruct.containMember(name)){
-//            System.out.println(name);
-//            System.out.println(nowStruct);
-//            System.out.println(inClassStruct);
             nowStruct = inClassStruct;
         }
         if(nowStruct.containMember(name)){
@@ -259,7 +257,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             indexs.add(new IntegerConst(32,false,0));
             indexs.add(new IntegerConst(32,false,nowStruct.getIndex(name)));
             Register thisReg = new Register(new LlvmPointerType(nowStruct),nowFunc.getMidRegName());
-            nowBlock.push_back(new LoadInst(thisReg,nowBlock,new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this")));
+            //nowBlock.push_back(new LoadInst(thisReg,nowBlock,new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this")));
+            nowBlock.push_back(new LoadInst(thisReg,nowBlock,nowFunc.paramin_this));
             Register register = new Register(new LlvmPointerType(nowStruct.getMemberType(name)),nowFunc.getMidRegName());
             nowBlock.push_back(new GetElementPtrInst(register,nowBlock,thisReg,indexs));
             register.typeName = nowStruct.getMemberTypeName(name);
@@ -358,10 +357,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         //int nowRegisterNum = 0;
         //if (funcName==null)funcName = funcDefNode.getIdentifier();
         ArrayList<Register>formParams = null;
+        Register param_this = null;
         if (isMethod){
             formParams = new ArrayList<>();
             //这个，名字得改之后//todo
             Register formParam = new Register(new LlvmPointerType(inClassStruct),"param_"+"this");
+            param_this = formParam;
             //nowRegisterNum++;
             formParams.add(formParam);
             if (funcDefNode.getParamList()!=null&&funcDefNode.getParamList().size()!=0){
@@ -386,6 +387,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         //if (formParams!=null)System.out.println("???");
         IrFunc irFunc = new IrFunc((LlvmSingleValueType) getLlvmType(funcDefNode.getTypeNode()),funcName,formParams,false);
         irFunc.typeName = funcDefNode.getTypeNode().type_name;
+        irFunc.param_this = param_this;
         funcs.add(irFunc);
     }
 
@@ -683,19 +685,27 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     @Override
     public void visit(FuncCallExprNode node) {
         IrFunc callFunc = null;
+        boolean isMethod = false;
         if (isInClass){
             callFunc = getFunc(inClassStruct.structName+"_"+node.getIdentifier());
         }
         if (callFunc==null)callFunc = getFunc(node.getIdentifier());
+        else isMethod = true;
 
-//        if (callFunc==null){
-//            System.out.println(node.getIdentifier());
-//        }
+
         if (callFunc!=null)
         callFunc.isUsed = true;
         ArrayList<Operand>realParams = null;
-        if (node.getParams()!=null&&node.getParams().size()!=0){//忘记之前怎么处理的了，只能冗余一下了
+
+        if (isMethod){
             realParams = new ArrayList<>();
+            Register param_this = new Register(new LlvmPointerType(inClassStruct),nowFunc.getMidRegName());
+            nowBlock.push_back(new LoadInst(param_this,nowBlock,nowFunc.paramin_this));
+            realParams.add(param_this);
+        }
+
+        if (node.getParams()!=null&&node.getParams().size()!=0){//忘记之前怎么处理的了，只能冗余一下了
+            if (!isMethod)realParams = new ArrayList<>();
             for (var it : node.getParams()){
                 it.acceptVisitor(this);
                 realParams.add(nowOperand);
@@ -734,10 +744,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
         if (isInClass){
             LlvmPointerType itType = new LlvmPointerType(inClassStruct);
-            Register register = new Register(new LlvmPointerType(itType),"paramin_"+"this");
+           // Register register = new Register(new LlvmPointerType(itType),"paramin_"+"this");
+            Register register = nowFunc.paramin_this;
             AllocInst allocInst = new AllocInst(itType,register,nowFunc.headBlock);
             nowFunc.headBlock.push_back(allocInst);
-            StoreInst storeInst = new StoreInst(nowBlock,new Register(new LlvmPointerType(inClassStruct),"param_"+"this"),register);
+            //StoreInst storeInst = new StoreInst(nowBlock,new Register(new LlvmPointerType(inClassStruct),"param_"+"this"),register);
+            StoreInst storeInst = new StoreInst(nowBlock,nowFunc.param_this,register);
             nowBlock.push_back(storeInst);
             //nowScope.addNode(it.getIdentifier(),it);
         }
@@ -844,7 +856,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         if (!(node.getObjExpr()instanceof ThisExprNode)){
             nowStruct = getStruct(nowOperand.typeName);
         }else {
-            nowOperand = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this");
+            //应该不能这样写，因为ASM中两个paramin_this应该是一个东西才行
+           // nowOperand = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this");
+            nowOperand = nowFunc.paramin_this;
         }
         isLeft = oldIsLeft;
         // System.out.println(nowOperand.typeName);
@@ -878,6 +892,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         callFunc.isUsed = true;
         ArrayList<Operand>realParams = new ArrayList<>();
         realParams.add(nowOperand);
+        //thisReg = (Register) nowOperand;
         if (node.getParams()!=null&&node.getParams().size()!=0){//忘记之前怎么处理的了，只能冗余一下了
             for (var it : node.getParams()){
                 it.acceptVisitor(this);
@@ -1047,7 +1062,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 inClassStruct = nowStruct;
                 isInClass = true;
                 for(var method : ((ClassDefNode) it).getMethods()){
+                    //paramThisReg = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"param_this");
                     nowFunc = getFunc(((ClassDefNode) it).getIdentifier()+"_"+method.getIdentifier());
+                    nowFunc.paramin_this = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this");
                     method.acceptVisitor(this);
                 }
             }else if (it instanceof FuncDefNode){
@@ -1076,6 +1093,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         RetInst inst = null;
         if (node.hasExprNode()) {
             node.getExprNode().acceptVisitor(this);
+            if (nowOperand instanceof NullPointerConst){
+                nowOperand.type = nowFunc.type;
+            }
             inst = new RetInst(nowBlock,nowOperand);
         }else {
             inst = new RetInst(nowBlock,null);
@@ -1187,6 +1207,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(ThisExprNode node) {
+        Register param_this = new Register(new LlvmPointerType(inClassStruct),nowFunc.getMidRegName());
+        nowBlock.push_back(new LoadInst(param_this,nowBlock,nowFunc.paramin_this));
+        nowOperand = param_this;
+        //System.out.println("ls");
         //nowOperand = nowStruct;
         //nowOperand = new Register(new LlvmPointerType(nowStruct),nowFunc.getMidRegName());
         //nowBlock.push_back(new LoadInst(nowOperand,nowBlock,new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this")));
