@@ -1,5 +1,6 @@
 package ASM;
 
+import ASM.AsmInst.ITypeInst;
 import ASM.AsmOperand.PhysicalReg;
 import IR.IrBlock;
 import IR.operand.Register;
@@ -18,11 +19,14 @@ public class AsmFunc {
     public AsmBlock headBlock;//这个应该用不上
     public int stackSize;
     public int instSize = 0;
+    public ITypeInst headSpInst = null;
+    public ITypeInst tailSpInst = null;
 
     public ArrayList<PhysicalReg> registers;//0base
 
-    public void changeStackSize(){
+    public int changeStackSize(){
         stackSize+=4;
+        return stackSize;
     }
 
     public PhysicalReg newPhyReg(){

@@ -3,7 +3,7 @@ package IR.operand;
 import IR.llvmType.LlvmSingleValueType;
 
 public abstract class BasicReg extends Operand{
-    public Operand valueReg;
+    private Operand valueReg;
 
     public BasicReg(LlvmSingleValueType type, String typeName,Operand valueReg) {
         super(type, typeName);

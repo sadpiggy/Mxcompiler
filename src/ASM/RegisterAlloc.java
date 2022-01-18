@@ -36,6 +36,23 @@ public class RegisterAlloc {
         }
     }
 
+    public void alloverflow(){
+        ArrayList<PhysicalReg> registers = new ArrayList<>();//asmFunc.registers
+        for (var it : asmFunc.registers){
+            if (it.isVirtual){
+                registers.add(it);
+            }
+        }
+        for (var it : registers){
+           // System.out.println(it);
+            it.isVirtual = false;
+            it.isAddress = true;
+            asmFunc.changeStackSize();
+            it.offset = -asmFunc.stackSize;
+            //System.out.println(asmFunc.stackSize);
+        }
+    }
+
     boolean deleteNode(ArrayList<PhysicalReg> registers){
         boolean value = false;
         ArrayList<PhysicalReg>deleteList = new ArrayList<>();
@@ -76,6 +93,7 @@ public class RegisterAlloc {
             }
         }
         if (!hadAlloc){//溢出
+          //  System.out.println("nmsl");
             target.isVirtual = false;
             target.isAddress = true;
             asmFunc.changeStackSize();

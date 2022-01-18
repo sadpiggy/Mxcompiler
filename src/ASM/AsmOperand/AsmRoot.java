@@ -26,14 +26,12 @@ public class AsmRoot {
             if (!it.isBuildIn){
                 ConflictAnalise conflictAnalise = new ConflictAnalise(it);
                 conflictAnalise.run();
-//                for (var value : it.registers){
-//                    System.out.println(value.conflictRegs.size());
-//                    for (var v:value.conflictRegs){
-//                        System.out.println(v);
-//                    }
-//                }
                 RegisterAlloc registerAlloc = new RegisterAlloc(it);
                 registerAlloc.foolishAlloc();
+               // registerAlloc.alloverflow();
+                it.setStackSize();
+                it.headSpInst.imm = new IntegerImm(-it.stackSize);
+                it.tailSpInst.imm = new IntegerImm(it.stackSize);
             }
         }
     }

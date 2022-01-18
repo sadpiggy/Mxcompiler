@@ -32,14 +32,14 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public int stringConstNum;
     public boolean isLeft;//这个之后要想办法取代
     public boolean isFirstFunc;
-    public boolean isInBranch;
+   // public boolean isInBranch;
     //为了控制流转换
     public IrBlock loopNextBlock;
     public IrBlock loopCondBlock;
     public ArrayList<AssignExprNode>globalInitNodes;
     public boolean fk1;//value优化
 
-    public HashMap<String,Register>methodMembers;//每个method都要更新
+    //public HashMap<String,Register>methodMembers;//每个method都要更新
 
     public IrFirstPass(){
         structs = new ArrayList<>();
@@ -61,8 +61,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         loopCondBlock = null;
         loopNextBlock = null;
         globalInitNodes = new ArrayList<>();
-        methodMembers = null;
-        isInBranch = false;
+       // methodMembers = null;
+       // isInBranch = false;
         fk1 = false;
         // nowStructName = null;
     }
@@ -210,7 +210,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 else {
                     Register value = new Register((LlvmSingleValueType) ((LlvmPointerType)(it.type)).pointeeType,nowFunc.getMidRegName(),it.typeName,null);
                     nowBlock.push_back(new LoadInst(value,nowBlock,it));
-                    it.valueReg = value;
+                    //it.valueReg = value;
                     return value;
                 }
             }
@@ -222,41 +222,14 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         BasicReg basicReg = nowScope.getVar(name);
         if (basicReg!=null){
             if (isLeft){
-                if (isInBranch)basicReg.valueReg = null;
                 return basicReg;
-            }
-            if (!isInBranch){
-                if (basicReg.valueReg!=null&&fk1)return basicReg.valueReg;
-                basicReg.valueReg = new Register((LlvmSingleValueType) ((LlvmPointerType)(basicReg.type)).pointeeType,nowFunc.getMidRegName(), basicReg.typeName, null);
-                nowBlock.push_back(new LoadInst(basicReg.valueReg,nowBlock,basicReg));
-                return basicReg.valueReg;
             }
             Register valueReg = new Register((LlvmSingleValueType) ((LlvmPointerType)(basicReg.type)).pointeeType,nowFunc.getMidRegName(), basicReg.typeName, null);
             nowBlock.push_back(new LoadInst(valueReg,nowBlock,basicReg));
-            basicReg.valueReg = null;
             return valueReg;
         }
         if (isInClass){
             if(inClassStruct.containMember(name)){
-                if (methodMembers.containsKey(name)){
-                    Register address = methodMembers.get(name);
-                    if (isLeft){
-                        if (isInBranch)address.valueReg = null;
-                        return address;
-                    }
-                    if (!isInBranch){
-                        if (address.valueReg!=null&&fk1)return address.valueReg;
-                        Register value = new Register(inClassStruct.getMemberType(name),nowFunc.getMidRegName(), inClassStruct.getMemberTypeName(name), null);
-                        nowBlock.push_back(new LoadInst(value,nowBlock,address));
-                        address.valueReg = value;
-                        return value;
-                    }else {
-                        Register value = new Register(inClassStruct.getMemberType(name),nowFunc.getMidRegName(), inClassStruct.getMemberTypeName(name), null);
-                        nowBlock.push_back(new LoadInst(value,nowBlock,address));
-                        address.valueReg = null;
-                        return value;
-                    }
-                }else {
                     ArrayList<Operand>indexs = new ArrayList<>();
                     indexs.add(new IntegerConst(32,false,0));
                     indexs.add(new IntegerConst(32,false,inClassStruct.getIndex(name)));
@@ -265,13 +238,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                     Register register = new Register(new LlvmPointerType(inClassStruct.getMemberType(name)),nowFunc.getMidRegName(),inClassStruct.getMemberTypeName(name),null);
                     nowBlock.push_back(new GetElementPtrInst(register,nowBlock,thisReg,indexs));
                     nowOperand = register;
-                    methodMembers.put(name,register);
                     if (isLeft) return register;
                     Register value = new Register(inClassStruct.getMemberType(name),nowFunc.getMidRegName(),inClassStruct.getMemberTypeName(name),null);
                     nowBlock.push_back(new LoadInst(value,nowBlock,register));
-                    if (!isInBranch)register.valueReg = value;
                     return value;
-                }
             }else {
                 return getGlobalVar(name);
             }
@@ -281,45 +251,17 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     }
 
     public void getThisMember(String name){
-        if (methodMembers.containsKey(name)){
-            Register address = methodMembers.get(name);
-            if (isLeft){
-                if (isInBranch)address.valueReg = null;
-                nowOperand = address;
-                return;
-            }
-            if (!isInBranch){
-                if (address.valueReg!=null&&fk1){
-                    nowOperand = address.valueReg;
-                    return;
-                }
-                Register value = new Register(inClassStruct.getMemberType(name),nowFunc.getMidRegName(),inClassStruct.getMemberTypeName(name),null );
-                nowBlock.push_back(new LoadInst(value,nowBlock,address));
-                address.valueReg = value;
-                nowOperand = value;
-            }else {
-                Register value = new Register(inClassStruct.getMemberType(name),nowFunc.getMidRegName(),inClassStruct.getMemberTypeName(name),null );
-                nowBlock.push_back(new LoadInst(value,nowBlock,address));
-                address.valueReg = null;
-                nowOperand = value;
-            }
-        }else {
             boolean old_isLeft = isLeft;
             isLeft = true;
             nowStruct = inClassStruct;
             getStructMember(name);
             isLeft = old_isLeft;
-            methodMembers.put(name, (Register) nowOperand);
-            if (isInBranch)((Register) nowOperand).valueReg = null;
             if (!isLeft){
                 Register register = (Register) nowOperand;
                 Register value = new Register((LlvmSingleValueType) ((LlvmPointerType)(nowOperand.type)).pointeeType,nowFunc.getMidRegName(), register.typeName, null );
                 nowBlock.push_back(new LoadInst(value,nowBlock,nowOperand));
                 nowOperand = value;
-                if (!isInBranch)register.valueReg = value;
-                else register.valueReg = null;
             }
-        }
     }
 
 
@@ -336,7 +278,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }
         nowBlock.push_back(new GetElementPtrInst(register,nowBlock,nowOperand,indexs));
         nowOperand = register;
-        if (isInBranch)register.valueReg = null;
         if (!isLeft){
             Register loadReg = new Register((LlvmSingleValueType) ((LlvmPointerType)(nowOperand.type)).pointeeType,nowFunc.getMidRegName(), nowStruct.getMemberTypeName(name),null );
             nowBlock.push_back(new LoadInst(loadReg,nowBlock,nowOperand));
@@ -517,8 +458,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         StoreInst inst = new StoreInst(nowBlock,rOp,lOp);
         nowBlock.push_back(inst);
         BasicReg basicReg = (BasicReg) lOp;
-        if (!isInBranch)basicReg.valueReg = rOp;
-        else basicReg.valueReg = null;
         isLeft = old_isLeft;
         if (isLeft)nowOperand = lOp;
         else nowOperand = rOp;
@@ -548,8 +487,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 isLeft = old_isLeft;
                 nowBlock.push_back(new BinaryInst(register,nowBlock, BinaryInst.InstOp.add,lReg,new IntegerConst(32,false,1)));
                 nowBlock.push_back(new StoreInst(nowBlock,register,nowOperand));
-                if (!isInBranch)((BasicReg)nowOperand).valueReg = register;
-                else ((BasicReg)nowOperand).valueReg = null;
                 if (!isLeft)nowOperand = register;
                 break;
             }
@@ -560,8 +497,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 isLeft = old_isLeft;
                 nowBlock.push_back(new BinaryInst(register,nowBlock, BinaryInst.InstOp.sub,lReg,new IntegerConst(32,false,1)));
                 nowBlock.push_back(new StoreInst(nowBlock,register,nowOperand));
-                if (!isInBranch)((BasicReg)nowOperand).valueReg = register;
-                else ((BasicReg)nowOperand).valueReg = null;
                 if (!isLeft)nowOperand = register;
                 break;
             }
@@ -747,7 +682,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(ForStmtNode node) {//将a换成this.a不是特别容易啊
-        boolean old_isInBranch = isInBranch;
         if (node.getInitExpr()!=null)node.getInitExpr().acceptVisitor(this);
         IrBlock condBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock bodyBlock = new IrBlock(nowFunc.getBlockLabel());
@@ -757,7 +691,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         IrBlock oldCondBlock = loopCondBlock;
         loopCondBlock = condBlock;
         loopNextBlock = nextBlock;
-        isInBranch = true;
         BrInst initBrInst = new BrInst(nowBlock,condBlock.label);
         nowBlock.push_back(initBrInst);
         nowBlock = condBlock;
@@ -784,7 +717,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowBlock = nextBlock;
         loopCondBlock = oldCondBlock;
         loopNextBlock = oldNextBlock;
-        isInBranch = old_isInBranch;
     }
 
     @Override
@@ -893,23 +825,13 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     public void visit(IdExprNode node) {//正常情况下，全局已经处理过了。int a = 5;先将a放入headBlock,然后
         node.operand = getBasicReg(node.getIdentifier());
         //System.out.println(getBasicReg("a"));
-        if (node.operand.typeName==null)
+        if (node.operand.typeName==null&&node.getType()!=null)
         node.operand.typeName = node.getType().typeName;
         nowOperand = node.operand;
-//        if (isLeft){
-//            nowOperand = node.operand;
-//            return;
-//        }
-//        nowOperand = new Register((LlvmSingleValueType) ((LlvmPointerType)(node.operand.type)).pointeeType,nowFunc.getMidRegName(),node.operand.typeName,null);
-//        nowOperand.typeName = node.operand.typeName;
-//        LoadInst inst = new LoadInst(nowOperand,nowBlock,node.operand);
-//        nowBlock.push_back(inst);
-//        ((BasicReg)node.operand).valueReg = nowOperand;
     }
 
     @Override
     public void visit(IfStmtNode node) {
-        boolean old_isInBranch = isInBranch;
         IrBlock trueBlock = new IrBlock(nowFunc.getBlockLabel());
         node.getConditionExpr().acceptVisitor(this);
         nowFunc.setBlock(trueBlock);
@@ -919,7 +841,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             BrInst initBrInst = new BrInst(nowBlock,nowOperand, trueBlock.label, falseBlock.label);
             nowBlock.push_back(initBrInst);
             nowBlock = trueBlock;
-            isInBranch = true;
             node.getTrueStmt().acceptVisitor(this);
             BrInst trueBrinst = new BrInst(nowBlock, nextBlock.label);
             nowBlock.push_back(trueBrinst);
@@ -935,14 +856,12 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             BrInst initBrinst = new BrInst(nowBlock,nowOperand, trueBlock.label, nextBlock.label);
             nowBlock.push_back(initBrinst);
             nowBlock = trueBlock;
-            isInBranch = true;
             node.getTrueStmt().acceptVisitor(this);
             BrInst trueBrinst = new BrInst(nowBlock, nextBlock.label);
             nowBlock.push_back(trueBrinst);
             nowFunc.setBlock(nextBlock);
             nowBlock = nextBlock;
         }
-        isInBranch = old_isInBranch;
         //IrBlock falseBlock = new IrBlock(nowBlock.getBlockLabel());
     }
 
@@ -975,16 +894,22 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         boolean old_isLeft = isLeft;
         isLeft = false;
         node.getObjExpr().acceptVisitor(this);
-        if (Objects.equals(node.getMethodName(), "size")){
+        boolean realSize = true;
+        if (nowOperand.type instanceof LlvmPointerType){
+            if (((LlvmPointerType) nowOperand.type).pointeeType instanceof LlvmStructType)
+                realSize = false;
+        }
+
+        if (Objects.equals(node.getMethodName(), "size")&&realSize){
             Register arraySize = new Register(new LlvmIntegerType(32,false),nowFunc.getMidRegName(),"int",null);
             Register sizeAddress = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName(),"int",null);
-            Register oralAddress = new Register(nowOperand.type,nowFunc.getMidRegName(),null,null);
+            //Register oralAddress = new Register(new LlvmIntegerType(32,false),nowFunc.getMidRegName(),null,null);
             ArrayList<Operand>index = new ArrayList<>();
             index.add(new IntegerConst(64,false,-1));
             Register sizeAddress2 = new Register(new LlvmPointerType(new LlvmIntegerType(32,false)),nowFunc.getMidRegName(),null,null);
             nowBlock.push_back(new BitcastInst(sizeAddress2,nowBlock,nowOperand));
-            nowBlock.push_back(new GetElementPtrInst(oralAddress,nowBlock,sizeAddress2,index));
-            nowBlock.push_back(new BitcastInst(sizeAddress,nowBlock,oralAddress));
+            nowBlock.push_back(new GetElementPtrInst(sizeAddress,nowBlock,sizeAddress2,index));
+            //nowBlock.push_back(new BitcastInst(sizeAddress,nowBlock,oralAddress));
             nowBlock.push_back(new LoadInst(arraySize,nowBlock,sizeAddress));
             nowOperand = arraySize;
             nowOperand.typeName = "int";
@@ -1159,8 +1084,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 inClassStruct = nowStruct;
                 isInClass = true;
                 for(var method : ((ClassDefNode) it).getMethods()){
-                    //paramThisReg = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"param_this");
-                    methodMembers = new HashMap<>();
                     nowFunc = getFunc(((ClassDefNode) it).getIdentifier()+"_"+method.getIdentifier());
                     nowFunc.paramin_this = new Register(new LlvmPointerType(new LlvmPointerType(nowStruct)),"paramin_this",inClassStruct.structName,null);
                     method.acceptVisitor(this);
@@ -1266,8 +1189,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 inst = new BinaryInst(register,nowBlock, BinaryInst.InstOp.add,lReg,new IntegerConst(32,false,1));
                 nowBlock.push_back(inst);
                 Inst storeInst = new StoreInst(nowBlock,register,nowOperand);
-                if (!isInBranch)((BasicReg)nowOperand).valueReg = register;
-                else ((BasicReg)nowOperand).valueReg = null;
                 nowBlock.push_back(storeInst);
                 nowOperand = lReg;
                 break;
@@ -1279,8 +1200,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 inst = new BinaryInst(register,nowBlock, BinaryInst.InstOp.sub,lReg,new IntegerConst(32,false,1));
                 nowBlock.push_back(inst);
                 Inst storeInst = new StoreInst(nowBlock,register,nowOperand);
-                if (!isInBranch)((BasicReg)nowOperand).valueReg = register;
-                else ((BasicReg)nowOperand).valueReg = null;
                 nowBlock.push_back(storeInst);
                 nowOperand = lReg;
                 break;
@@ -1325,8 +1244,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             isLeft = old_isLeft;
             StoreInst storeInst = new StoreInst(nowBlock,nowOperand,register);
             nowBlock.push_back(storeInst);
-            if (!isInBranch)register.valueReg = nowOperand;
-            else register.valueReg = null;
         }
     }
 
@@ -1342,7 +1259,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(WhileStmtNode node) {
-        boolean old_isInbranch = isInBranch;
         IrBlock condBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock bodyBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock nextBlock = new IrBlock(nowFunc.getBlockLabel());
@@ -1354,7 +1270,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowBlock.push_back(initInst);
         nowFunc.setBlock(condBlock);
         nowBlock = condBlock;
-        isInBranch = true;
         node.getConditionExpr().acceptVisitor(this);
         BrInst condBrinst = new BrInst(nowBlock,nowOperand, bodyBlock.label, nextBlock.label);
         nowBlock.push_back(condBrinst);
@@ -1367,7 +1282,6 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowBlock = nextBlock;
         loopNextBlock = oldNextBlock;
         loopCondBlock = oldCondBlock;
-        isInBranch = old_isInbranch;
     }
 
     @Override

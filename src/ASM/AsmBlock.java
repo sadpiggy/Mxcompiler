@@ -34,7 +34,7 @@ public class AsmBlock {
     }
 
     public void push_front(asmInst inst){
-        insts.addFirst(inst);
+        insts.addFirst(inst);belongTo.instSize++;
     }
 
     public void pushAfterInst(asmInst targetInst,asmInst inst){
