@@ -25,6 +25,8 @@ public class ConflictAnalise {
                 PhysicalReg phyJ = registers.get(j);
                 if (phyI.isVirtual&&phyJ.isVirtual){
                     //System.out.println("gi");
+                    if (phyI.liveStart> phyI.liveEnd)phyI.liveEnd = phyI.liveStart;
+                    if (phyJ.liveStart> phyJ.liveEnd)phyJ.liveEnd = phyJ.liveStart;
                     if (!(phyI.liveEnd<phyJ.liveStart||phyI.liveStart>phyJ.liveEnd)){
                         phyI.conflictRegs.push(phyJ);
                         phyJ.conflictRegs.push(phyI);

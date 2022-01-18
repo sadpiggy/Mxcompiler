@@ -92,6 +92,11 @@ public class InstSelector {//构造函数那里有bug
             if (isLeft){
                 return currentAsmFunc.newPhyReg(register.name);
             }else {
+//                if (Objects.equals(register.name, "m19")||Objects.equals(register.name, "m17")){
+//                    System.out.println(register.name);
+//                    System.out.println(currentAsmFunc.getPhyReg(register.name,liveEnd).liveStart);
+//                    System.out.println(liveEnd);
+//                }
                 return currentAsmFunc.getPhyReg(register.name,liveEnd);
             }
         }else if (operand instanceof IntegerConst){
@@ -369,6 +374,7 @@ public class InstSelector {//构造函数那里有bug
                     Operand operand = inst.params.get(i);
                     PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
                     currentAsmBlock.push_back(new MoveInst(currentAsmBlock,new PhysicalReg("a"+i,"cnm"),physicalReg));
+
                 }else {
                     Operand operand = inst.params.get(i);
                     PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
