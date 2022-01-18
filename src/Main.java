@@ -64,8 +64,8 @@ public class Main{
                 new FileOutputStream("ravel/build/test.s")),true));
 
                 asmRoot.printAsm(System.out);
-
-               // irFirstPass.printIr();
+                //FEN ZHI!!!
+                //irFirstPass.printIr();
                 //sdjs
             }
 

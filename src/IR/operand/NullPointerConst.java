@@ -6,8 +6,9 @@ import IR.llvmType.LlvmSingleValueType;
 
 public class NullPointerConst extends Const{
     public String value;
-    public NullPointerConst() {
-        super(new LlvmPointerType(new LlvmIntegerType(8,false)));
+    public NullPointerConst(LlvmSingleValueType type) {
+        //super(new LlvmPointerType(new LlvmIntegerType(8,false)));
+        super(type);
         value = "null";
     }
 

@@ -4,20 +4,21 @@ import ASM.AsmOperand.PhysicalReg;
 import IR.llvmType.LlvmPointerType;
 import IR.llvmType.LlvmSingleValueType;
 
-public class Register extends Operand{
+public class Register extends BasicReg{
     public String name;
-//    public int offset;
-//    public PhysicalReg physicalReg;
-//    public boolean isPhysical;
+    //public boolean isAddress;
 
-    public Register(LlvmSingleValueType type,String name) {
-       //super(new LlvmPointerType(type));
-        super(type);
+    public Register(LlvmSingleValueType type,String name,String typeName,Operand valueReg) {
+        super(type,typeName,valueReg);
         this.name = name;
-//        offset = 0;
-//        physicalReg = null;
-//        isPhysical = false;
+        //this.isAddress = isAddress;
     }
+
+    public String getTypeName(){
+        return typeName;
+    }
+
+
 
     public int getAlignSize(){
         return type.getAlignSize();

@@ -1,5 +1,6 @@
 package AST;
 
+import IR.operand.BasicReg;
 import IR.operand.Operand;
 import IR.operand.Register;
 import Mutil.Position;

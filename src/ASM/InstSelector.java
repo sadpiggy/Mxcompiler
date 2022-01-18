@@ -179,12 +179,12 @@ public class InstSelector {//构造函数那里有bug
             }
         }
 
-        tailBlock = new AsmBlock(irFunc.name+"_tail");
+        tailBlock = new AsmBlock(irFunc.name+"_tail",currentAsmFunc);
 
         //Register paramin_this = new Register();
 
         for (var it : irFunc.blocks){
-            currentAsmBlock = new AsmBlock(it.getBlockLabel());
+            currentAsmBlock = new AsmBlock(it.getBlockLabel(),currentAsmFunc);
             currentAsmFunc.setBlock(currentAsmBlock);
             visitIrBlock(it);
         }
@@ -301,10 +301,6 @@ public class InstSelector {//构造函数那里有bug
         PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
         PhysicalReg value = getPhysicalReg(inst.value, false,dest.liveStart,true);
         currentAsmBlock.push_back(new MoveInst(currentAsmBlock,dest,value));
-//        dest.isVirtual = value.isVirtual;;
-//        dest.isAddress = value.isAddress;
-//        dest.offset = value.offset;
-//        dest.phyType = value.phyType;
     }
 
     public void visitBrInst(BrInst inst) {
@@ -312,7 +308,7 @@ public class InstSelector {//构造函数那里有bug
             currentAsmBlock.push_back(new JInst(currentAsmBlock,inst.trueBranch.getName()));
         }else {
             //这个很可能有问题
-            currentAsmBlock.push_back(new ASM.AsmInst.BrInst(currentAsmBlock, ASM.AsmInst.BrInst.BrTypeOp.beqz,getPhysicalReg(inst.condition,false, currentAsmFunc.registers.size(), true),inst.falseBranch.getName()));
+            currentAsmBlock.push_back(new ASM.AsmInst.BrInst(currentAsmBlock, ASM.AsmInst.BrInst.BrTypeOp.beqz,getPhysicalReg(inst.condition,false, currentAsmFunc.getLiveEnd(), true),inst.falseBranch.getName()));
             currentAsmBlock.push_back(new JInst(currentAsmBlock,inst.trueBranch.getName()));
         }
     }
@@ -344,14 +340,14 @@ public class InstSelector {//构造函数那里有bug
             for (int i=0;i<inst.params.size();i++){
                 if (i<=7){
                     Operand operand = inst.params.get(i);
-                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.registers.size(),true);//
+                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
                     currentAsmBlock.push_back(new MoveInst(currentAsmBlock,new PhysicalReg("a"+i,"cnm"),physicalReg));
                 }else {
                     currentAsmFunc.changeStackSize();
                     PhysicalReg addressReg = new PhysicalReg("overflowA"+i,overflowSize);
                     overflowSize+=4;
                     Operand operand = inst.params.get(i);
-                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.registers.size(),true);//
+                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
                     currentAsmBlock.push_back(new MoveInst(currentAsmBlock,addressReg,physicalReg));
                 }
                 //getPhysicalReg(operand,new PhysicalReg("a"+i),false,0);
@@ -445,7 +441,7 @@ public class InstSelector {//构造函数那里有bug
 
     public void visitRetInst(RetInst inst) {
         if (inst.value!=null){
-            PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.registers.size(),true);
+            PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),true);
             //System.out.println(value);
             currentAsmBlock.push_back(new MoveInst(currentAsmBlock,a0,value));
         }
@@ -464,8 +460,8 @@ public class InstSelector {//构造函数那里有bug
     }
 
     public void visitStoreInst(StoreInst inst) {
-        PhysicalReg pointer = getPhysicalReg(inst.pointer,false,currentAsmFunc.registers.size(),true);
-        PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.registers.size(),false);
+        PhysicalReg pointer = getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),true);
+        PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),false);
         if (inst.pointer instanceof GlobalOperand){
             currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new RelocationImm(RelocationImm.Type.lo,((GlobalOperand) inst.pointer).name),value,pointer));
         }else if (pointer.isAddress){

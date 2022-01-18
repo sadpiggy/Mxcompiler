@@ -29,8 +29,8 @@ public class IrFunc extends Operand{
     //public IrScope irScope;
 
 
-    public IrFunc(LlvmSingleValueType type,String name,ArrayList<Register>formParams,boolean isBuildIn) {
-        super(type);
+    public IrFunc(LlvmSingleValueType type,String name,ArrayList<Register>formParams,boolean isBuildIn,String typeName) {
+        super(type,typeName);
         isDeclare = false;
         this.name = name;
         this.formParams = formParams;

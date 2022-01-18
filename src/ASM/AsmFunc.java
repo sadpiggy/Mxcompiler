@@ -17,6 +17,7 @@ public class AsmFunc {
     public boolean isBuildIn;
     public AsmBlock headBlock;//这个应该用不上
     public int stackSize;
+    public int instSize = 0;
 
     public ArrayList<PhysicalReg> registers;//0base
 
@@ -28,6 +29,10 @@ public class AsmFunc {
         PhysicalReg physicalReg = new PhysicalReg("wky"+registers.size());//virtual
         setPhyReg(physicalReg);
         return physicalReg;
+    }
+
+    public int getLiveEnd(){
+        return registers.size();
     }
 
     public PhysicalReg newPhyReg(String labelName){

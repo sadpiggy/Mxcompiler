@@ -17,18 +17,20 @@ public class AsmBlock {
     public RetInst tailInst;//尾
     public int loopDepth;
 
-    public AsmBlock(String name){
+    public AsmBlock(String name,AsmFunc belongTo){
         insts = new LinkedList<>();
         loopDepth = 0;
         this.name = name;
         tailInst = null;
         instIndex = 0;
+        this.belongTo = belongTo;
     }
 
     public void push_back(asmInst inst){
         insts.addLast(inst);
         inst.name = instIndex++;
         if (inst instanceof RetInst)tailInst = (RetInst) inst;
+        belongTo.instSize++;
     }
 
     public void push_front(asmInst inst){
