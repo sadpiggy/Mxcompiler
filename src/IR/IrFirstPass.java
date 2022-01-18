@@ -35,7 +35,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
    // public boolean isInBranch;
     //为了控制流转换
     public IrBlock loopNextBlock;
-    public IrBlock loopCondBlock;
+    //public IrBlock loopCondBlock;
+    public IrBlock loopChangeBlock;
     public ArrayList<AssignExprNode>globalInitNodes;
     public boolean fk1;//value优化
 
@@ -58,7 +59,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         stringConstNum = 0;
         isLeft = false;
         isFirstFunc = false;
-        loopCondBlock = null;
+        loopChangeBlock = null;
         loopNextBlock = null;
         globalInitNodes = new ArrayList<>();
        // methodMembers = null;
@@ -667,7 +668,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
     @Override
     public void visit(ContinueStmtNode node) {
-        nowBlock.push_back(new BrInst(nowBlock, loopCondBlock.label));
+        nowBlock.push_back(new BrInst(nowBlock, loopChangeBlock.label));
     }
 
     @Override
@@ -688,8 +689,8 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         IrBlock changeBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock nextBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock oldNextBlock = loopNextBlock;
-        IrBlock oldCondBlock = loopCondBlock;
-        loopCondBlock = condBlock;
+        IrBlock oldChangeBlock = loopChangeBlock;
+        loopChangeBlock = changeBlock;
         loopNextBlock = nextBlock;
         BrInst initBrInst = new BrInst(nowBlock,condBlock.label);
         nowBlock.push_back(initBrInst);
@@ -715,7 +716,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowBlock.push_back(changeBrinst);
         nowFunc.setBlock(nextBlock);
         nowBlock = nextBlock;
-        loopCondBlock = oldCondBlock;
+        loopChangeBlock = oldChangeBlock;
         loopNextBlock = oldNextBlock;
     }
 
@@ -1263,9 +1264,9 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         IrBlock bodyBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock nextBlock = new IrBlock(nowFunc.getBlockLabel());
         IrBlock oldNextBlock = loopNextBlock;
-        IrBlock oldCondBlock = loopCondBlock;
+        IrBlock oldChangeBlock = loopChangeBlock;
         loopNextBlock = nextBlock;
-        loopCondBlock = condBlock;
+        loopChangeBlock = condBlock;
         BrInst initInst = new BrInst(nowBlock, condBlock.label);
         nowBlock.push_back(initInst);
         nowFunc.setBlock(condBlock);
@@ -1281,7 +1282,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         nowFunc.setBlock(nextBlock);
         nowBlock = nextBlock;
         loopNextBlock = oldNextBlock;
-        loopCondBlock = oldCondBlock;
+        loopChangeBlock = oldChangeBlock;
     }
 
     @Override
