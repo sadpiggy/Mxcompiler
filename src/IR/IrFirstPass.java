@@ -63,7 +63,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         globalInitNodes = new ArrayList<>();
         methodMembers = null;
         isInBranch = false;
-        fk1 = true;
+        fk1 = false;
         // nowStructName = null;
     }
 
@@ -306,6 +306,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
         }else {
             boolean old_isLeft = isLeft;
             isLeft = true;
+            nowStruct = inClassStruct;
             getStructMember(name);
             isLeft = old_isLeft;
             methodMembers.put(name, (Register) nowOperand);
@@ -1002,7 +1003,7 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
             }
         }
         isLeft = old_isLeft;
-        if (!Objects.equals(callFunc.type.toString(), "void")){
+        if (!Objects.equals(callFunc.typeName, "void")){
             nowOperand = new Register(callFunc.type, nowFunc.getMidRegName(), callFunc.typeName, null);
             if (Objects.equals(callFunc.name, "getString")|| Objects.equals(callFunc.name, "toString")|| Objects.equals(callFunc.name, "string_substring")|| Objects.equals(callFunc.name, "string_add")){
                 nowOperand.typeName = "string";
