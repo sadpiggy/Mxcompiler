@@ -41,11 +41,12 @@ public class Main{
             ProgramNode astRoot = (ProgramNode) astBuilder.visit(parseTreeRoot);
             Scope globalScope = new Scope(null);
             //semantic checker
-            SymbolCollector symbolCollector = new SymbolCollector(globalScope);
-            astRoot.acceptVisitor(symbolCollector);
-            SemanticChecker semanticChecker = new SemanticChecker(globalScope);
-
-            astRoot.acceptVisitor(semanticChecker);
+            if (semanticOnly){
+                SymbolCollector symbolCollector = new SymbolCollector(globalScope);
+                astRoot.acceptVisitor(symbolCollector);
+                SemanticChecker semanticChecker = new SemanticChecker(globalScope);
+                astRoot.acceptVisitor(semanticChecker);
+            }
 
             if (!semanticOnly){
                 //ir

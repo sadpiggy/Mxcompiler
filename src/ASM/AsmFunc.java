@@ -29,12 +29,6 @@ public class AsmFunc {
         return stackSize;
     }
 
-    public PhysicalReg newPhyReg(){
-        PhysicalReg physicalReg = new PhysicalReg("wky"+registers.size());//virtual
-        setPhyReg(physicalReg);
-        return physicalReg;
-    }
-
     public int getLiveEnd(){
         return registers.size();
     }
@@ -43,13 +37,6 @@ public class AsmFunc {
         PhysicalReg physicalReg = new PhysicalReg(labelName);//virtual
         setPhyReg(physicalReg);
         return physicalReg;
-    }
-
-    public PhysicalReg getPhyReg(String name){
-        for (var it : registers){
-            if (Objects.equals(it.labelName, name))return it;
-        }
-        return null;
     }
 
     public PhysicalReg getPhyReg(String name, int liveEnd){

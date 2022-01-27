@@ -11,7 +11,8 @@ public class PhysicalReg extends AsmReg{
     public int offset;
     public int liveStart;
     public int liveEnd;
-    public LinkedList<PhysicalReg>conflictRegs;
+    private LinkedList<PhysicalReg>conflictRegs;
+    public int conflictSize = -1;
 
     public static String[] PhyRegNames = {
             "zero", "ra", "sp", "gp", "tp",
@@ -74,11 +75,21 @@ public class PhysicalReg extends AsmReg{
     }
 
     public void addConflict(PhysicalReg physicalReg){
-        conflictRegs.add(physicalReg);
+        conflictRegs.push(physicalReg);
+        conflictSize++;
     }
 
     public void deleteConflict(PhysicalReg physicalReg){
-        conflictRegs.remove(physicalReg);
+        //conflictRegs.remove(physicalReg);
+        conflictSize--;
+    }
+
+    public LinkedList<PhysicalReg> getConflictRegs(){
+        return conflictRegs;
+    }
+
+    public int getConflictSize(){
+        return conflictSize;
     }
 
     @Override

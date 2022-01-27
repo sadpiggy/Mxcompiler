@@ -28,8 +28,10 @@ public class ConflictAnalise {
                     if (phyI.liveStart> phyI.liveEnd)phyI.liveEnd = phyI.liveStart;
                     if (phyJ.liveStart> phyJ.liveEnd)phyJ.liveEnd = phyJ.liveStart;
                     if (!(phyI.liveEnd<phyJ.liveStart||phyI.liveStart>phyJ.liveEnd)){
-                        phyI.conflictRegs.push(phyJ);
-                        phyJ.conflictRegs.push(phyI);
+                        //phyI.conflictRegs.push(phyJ);
+                        //phyJ.conflictRegs.push(phyI);
+                        phyI.addConflict(phyJ);
+                        phyJ.addConflict(phyJ);
                     }
                 }
             }

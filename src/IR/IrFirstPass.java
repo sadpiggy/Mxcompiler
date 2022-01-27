@@ -593,7 +593,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
                 case Add: nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value+rValue.value);break;
                 case Sub: nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value-rValue.value);break;
                 case Mul: nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value*rValue.value);break;
-                case Div: nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value/rValue.value);break;
+                case Div:
+                    if (rValue.value!=0)nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value/rValue.value);
+                    else nowOperand = new IntegerConst(lValue.width,lValue.isBool,0);
+                    break;
                 case Mod: nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value%rValue.value);break;
                 case ShiftLeft : nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value<<rValue.value);break;
                 case ShiftRight : nowOperand = new IntegerConst(lValue.width,lValue.isBool,lValue.value >> rValue.value);break;

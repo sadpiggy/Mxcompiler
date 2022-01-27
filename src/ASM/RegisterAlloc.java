@@ -11,6 +11,7 @@ public class RegisterAlloc {
     public AsmFunc asmFunc;
     public Stack<PhysicalReg> regStack;//被删掉的节点
     public int allocRegSize = 15;
+    // boolean debugUse = false;
     public RegisterAlloc(AsmFunc asmFunc){
         this.asmFunc = asmFunc;
         regStack = new Stack<>();
@@ -26,13 +27,22 @@ public class RegisterAlloc {
         boolean value = true;
         while (value){
             value = deleteNode(registers);
-            //System.out.println("ml");
         }
-        for (var it : registers){
-            allocSingle(it);
-        }
+//        for (var it : registers){//这个要改
+//            allocSingle(it);
+//            //allocSingleOver(it);
+//        }
+        // 8189196276
+        // 8189196276
         while (regStack.size()!=0){
             allocSingle(regStack.pop());
+        }
+
+      //  debugUse = true;
+
+        for (var it : registers){//这个要改
+            allocSingle(it);
+           // allocSingleOver(it);
         }
     }
 
@@ -57,9 +67,9 @@ public class RegisterAlloc {
         boolean value = false;
         ArrayList<PhysicalReg>deleteList = new ArrayList<>();
         for (var it : registers){
-            if (it.conflictRegs.size()<allocRegSize){
-                for (var reg : it.conflictRegs){
-                    if (reg.conflictRegs.contains(it)){
+            if (it.getConflictSize()<allocRegSize){
+                for (var reg : it.getConflictRegs()){
+                    if (reg.getConflictRegs().contains(it)){
                         reg.deleteConflict(it);
                     }
                 }
@@ -79,13 +89,14 @@ public class RegisterAlloc {
         boolean hadAlloc = false;
         for (var it : PhysicalReg.allocatablePhyRegNames){
             boolean flag = true;
-            for (var reg : target.conflictRegs){
+            for (var reg : target.getConflictRegs()){
                 if (!reg.isVirtual&& Objects.equals(reg.phyType, it)){
                     flag = false;
                     break;
                 }
             }
             if (flag){
+
                 target.isVirtual=false;
                 target.phyType = it;
                 hadAlloc = true;
@@ -96,10 +107,21 @@ public class RegisterAlloc {
           //  System.out.println("nmsl");
             target.isVirtual = false;
             target.isAddress = true;
+            target.phyType = "address";
             asmFunc.changeStackSize();
             target.offset = -asmFunc.stackSize;
-            for (var it : target.conflictRegs)it.deleteConflict(target);
+            for (var it : target.getConflictRegs())it.deleteConflict(target);
         }
+    }
+
+    void allocSingleOver(PhysicalReg target){
+        //  System.out.println("nmsl");
+        target.isVirtual = false;
+        target.isAddress = true;
+        target.phyType = "address";
+        asmFunc.changeStackSize();
+        target.offset = -asmFunc.stackSize;
+        for (var it : target.getConflictRegs())it.deleteConflict(target);
     }
 
 }
