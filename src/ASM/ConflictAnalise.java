@@ -31,7 +31,7 @@ public class ConflictAnalise {
                         //phyI.conflictRegs.push(phyJ);
                         //phyJ.conflictRegs.push(phyI);
                         phyI.addConflict(phyJ);
-                        phyJ.addConflict(phyJ);
+                        phyJ.addConflict(phyI);
                     }
                 }
             }
