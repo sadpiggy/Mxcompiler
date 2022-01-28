@@ -8,6 +8,7 @@ import IR.llvmType.LlvmLabelType;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class AsmBlock {
     public AsmFunc belongTo;
@@ -27,6 +28,7 @@ public class AsmBlock {
     }
 
     public void push_back(asmInst inst){
+        if (insts.size()!=0)insts.getLast().nextInst = inst;
         insts.addLast(inst);
         inst.name = instIndex++;
         if (inst instanceof RetInst)tailInst = (RetInst) inst;
@@ -34,6 +36,7 @@ public class AsmBlock {
     }
 
     public void push_front(asmInst inst){
+        if (insts.size()!=0)inst.nextInst = insts.getFirst();
         insts.addFirst(inst);belongTo.instSize++;
     }
 
@@ -53,7 +56,9 @@ public class AsmBlock {
 
     public void printAsm() throws FileNotFoundException {
         System.out.println(".L" + name+":\n");
-        for (var it : insts)System.out.println(it.toString());
+        for (var it : insts){
+            if (!Objects.equals(it.toString(), ""))System.out.println(it.toString());
+        }
     }
 
     public void printDebug() {

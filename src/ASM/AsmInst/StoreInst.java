@@ -26,6 +26,9 @@ public class StoreInst extends asmInst{
 
     @Override
     public String toString() {
+        if (isDead)return "";
+        PhysicalReg rs1_mid = rs1;
+        PhysicalReg rs2_mid = rs2;
         StringBuilder stringBuilder = new StringBuilder();
         if (rs2.isAddress){
             stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs2.toString() + "(s0)\n");
@@ -38,6 +41,8 @@ public class StoreInst extends asmInst{
             stringBuilder.append("\t" + "sub" + " " + t2 + ", " + rs1 + ", " + t2);
             stringBuilder.append("\n\t" + op + " " + rs2 + ", " + new IntegerImm(0) + "(" + t2 + ")");
         }
+        rs1 = rs1_mid;
+        rs2 = rs2_mid;
         return stringBuilder.toString();
     }
 }

@@ -9,9 +9,10 @@ public class PhysicalReg extends AsmReg{
     public boolean isVirtual;
     public boolean isAddress;
     public int offset;
-    public int liveStart;
-    public int liveEnd;
+    public int liveStart = 0;
+    public int liveEnd = 0;
     public LinkedList<PhysicalReg>conflictRegs;
+    public boolean hadAlloc = false;
    // public int conflictSize = -1;
 
     public static String[] PhyRegNames = {
@@ -40,10 +41,16 @@ public class PhysicalReg extends AsmReg{
 //    };
 
     public static String[] allocatablePhyRegNames = {
-            //"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
             "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11",
              "t3", "t4", "t5", "t6",
+            "a1", "a2", "a3", "a4", "a5", "a6", "a7",//为什么？？？
     };
+
+//    public static String[] allocatablePhyRegNames = {
+//            //"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
+//            "s11", "s10", "s9", "s8", "s7", "s6", "s5", "s4", "s3", "s2", "s1",
+//            "t6", "t5", "t4", "t3"
+//    };
 
 
 

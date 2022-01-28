@@ -27,6 +27,9 @@ public class LoadInst extends asmInst{
 
     @Override
     public String toString() {
+        PhysicalReg rs1_mid = rs1;
+        PhysicalReg rs2_mid = rs2;
+        if (isDead)return "";
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
             stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
@@ -35,14 +38,19 @@ public class LoadInst extends asmInst{
         if (rd.isAddress){
             stringBuilder.append("\t" + op + " " + t0 + ", " + imm + "(" + rs1 + ")\n");
             stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)");
+            rs1 = rs1_mid;
             return stringBuilder.toString();
         }
         if (imm.isValidImm()) {
-            return stringBuilder.append("\t" + op + " " + rd + ", " + imm + "(" + rs1 + ")").toString();
+            stringBuilder.append("\t" + op + " " + rd + ", " + imm + "(" + rs1 + ")");
+            rs1 = rs1_mid;
+            return stringBuilder.toString();
         }else {
             stringBuilder.append( "\tli " + t2 + ", " + imm + "\n");
             stringBuilder.append("\t" + "sub" + " " + t2 + ", " + rs1 + ", " + t2);
-            return stringBuilder.append("\n\t" + op + " " + rd + ", " + new IntegerImm(0) + "(" + t2 + ")").toString();
+            stringBuilder.append("\n\t" + op + " " + rd + ", " + new IntegerImm(0) + "(" + t2 + ")");
+            rs1 = rs1_mid;
+            return stringBuilder.toString();
         }
     }
 }

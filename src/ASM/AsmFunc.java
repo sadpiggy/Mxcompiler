@@ -1,8 +1,10 @@
 package ASM;
 
 import ASM.AsmInst.ITypeInst;
+import ASM.AsmInst.asmInst;
 import ASM.AsmOperand.PhysicalReg;
 import IR.IrBlock;
+import IR.inst.Inst;
 import IR.operand.Register;
 
 import java.io.FileNotFoundException;
@@ -21,12 +23,25 @@ public class AsmFunc {
     public int instSize = 0;
     public ITypeInst headSpInst = null;
     public ITypeInst tailSpInst = null;
+    public LinkedList<asmInst>insts = null;
+    public LinkedList<asmInst>calleeSaveInsts1 = new LinkedList<>();
+    public LinkedList<asmInst>calleeSaveInsts2 = new LinkedList<>();
+    public LinkedList<asmInst>callerSaveInsts = new LinkedList<>();
 
     public ArrayList<PhysicalReg> registers;//0base
 
     public int changeStackSize(){
         stackSize+=4;
         return stackSize;
+    }
+
+    public void setInsts(){
+        for (var block : blocks){
+            if (insts.size()!=0)insts.getLast().nextInst = block.insts.getFirst();
+            for (var inst : block.insts){
+                insts.addLast(inst);
+            }
+        }
     }
 
     public int getLiveEnd(){

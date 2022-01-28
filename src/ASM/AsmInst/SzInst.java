@@ -23,6 +23,8 @@ public class SzInst extends asmInst{
 
     @Override
     public String toString() {
+        PhysicalReg rs1_mid = rs1;
+        PhysicalReg rs2_mid = rs2;
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
             stringBuilder.append("\t"+"lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
@@ -31,9 +33,10 @@ public class SzInst extends asmInst{
         if (rd.isAddress){
             stringBuilder.append("\t"+op + " " + t0 + ", " + rs1+"\n");
             stringBuilder.append("\t"+"sw " + t0 + ", " + rd.toString() + "(s0)");
+            rs1 = rs1_mid;
             return stringBuilder.toString();
         }
-
+        rs1 = rs1_mid;
         return stringBuilder.append(op + " " + rd + ", " + rs1).toString();
     }
 }
