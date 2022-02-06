@@ -13,6 +13,7 @@ public class PhysicalReg extends AsmReg{
     public int liveEnd = 0;
     public LinkedList<PhysicalReg>conflictRegs;
     public boolean hadAlloc = false;
+    public boolean isDead = false;
    // public int conflictSize = -1;
 
     public static String[] PhyRegNames = {
