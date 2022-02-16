@@ -43,6 +43,7 @@ public class ITypeInst extends asmInst{
                 return stringBuilder.toString();
             }else {
                 stringBuilder.append("\t" + "add" + " " + rd + ", " + rs1 + ", " + t2);
+                rs1 = rs1_mid;
                 return stringBuilder.toString();
             }
         }

@@ -92,9 +92,9 @@ public class RegisterAlloc {
         if (target.isPhysical)return;
         boolean hadAlloc = false;
 
-        //boolean debug = false;
+        boolean debug = false;
 
-        //if (!debug)
+        if (!debug)
         for (var it : PhysicalReg.allocatablePhyRegNames){
             boolean flag = true;
             for (var reg : target.conflictRegs){

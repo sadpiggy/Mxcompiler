@@ -125,14 +125,16 @@ public class InstSelector {//构造函数那里有bug
             if (isLeft){
                 if (!currentAsmFunc.containReg(register.name))
                 {
-                    if (loopDepth==0)
+                    if (loopDepth==0||!operand.isAlloc)
                     return currentAsmFunc.newPhyReg(register.name);
                     else return currentAsmFunc.newPhyReg(register.name,live);
                 }
-                if (loopDepth==0)return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
+                if (loopDepth==0||!operand.isAlloc)return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
                 else return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),live);
             }else {
+                if (operand.isAlloc)
                 return currentAsmFunc.getPhyReg(register.name,liveEnd);
+                else return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd());
             }
         }else if (operand instanceof IntegerConst){
             IntegerConst integerConst = (IntegerConst) operand;
@@ -264,10 +266,12 @@ public class InstSelector {//构造函数那里有bug
     public void visitIrBlock(IrBlock irBlock){
         for(var it : irBlock.insts){
             if (it.isLoopBegin){
-                liveValue newLive = new liveValue(0);
-                newLive.notChange = true;
-                newLive.oldLive = live;
-                live = newLive;
+                if (loopDepth==0){
+                    liveValue newLive = new liveValue(0);
+                    newLive.notChange = true;
+                    newLive.oldLive = live;
+                    live = newLive;
+                }
                 loopDepth++;
             }
             if (it instanceof AllocInst){
@@ -362,10 +366,11 @@ public class InstSelector {//构造函数那里有bug
 
         if (inst.isLoopEnd){
             loopDepth--;
-            live.value = currentAsmFunc.getLiveEnd().value;
-            live.notChange = false;
-
-            live = live.oldLive;
+            if (loopDepth==0){
+                live.value = currentAsmFunc.getLiveEnd().value;
+                live.notChange = false;
+                live = live.oldLive;
+            }
 
         }
 

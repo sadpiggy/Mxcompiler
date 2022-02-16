@@ -36,7 +36,8 @@ public class SzInst extends asmInst{
             rs1 = rs1_mid;
             return stringBuilder.toString();
         }
+        stringBuilder.append(op + " " + rd + ", " + rs1);
         rs1 = rs1_mid;
-        return stringBuilder.append(op + " " + rd + ", " + rs1).toString();
+        return stringBuilder.toString();
     }
 }
