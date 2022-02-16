@@ -9,6 +9,7 @@ public class BrInst extends asmInst{
         beqz, bnez, blez, bgez, bltz, bgtz
     }
     private PhysicalReg t0 = new PhysicalReg("t0","cnm");
+    private PhysicalReg t1 = new PhysicalReg("t1","cnm");
 
     public BrTypeOp op;
     public String target;
@@ -23,8 +24,8 @@ public class BrInst extends asmInst{
     @Override
     public String toString() {
         if (rs1.isAddress){
-            StringBuilder stringBuilder = new StringBuilder("\t" + "lw	"+ t0 + ", " + rs1.toString() + "(s0)\n");
-            stringBuilder.append("\t" +  op + " " + t0 + ", "  + target);
+            StringBuilder stringBuilder = new StringBuilder("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
+            stringBuilder.append("\t" +  op + " " + t1 + ", "  + target);
             return stringBuilder.toString();
         }
         return "\t" + op + " " + rs1 + ", "  + target;

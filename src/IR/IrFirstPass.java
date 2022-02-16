@@ -446,13 +446,18 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
     @Override
     public void visit(AssignExprNode node) {//a = b
         boolean old_isLeft = isLeft;
-        isLeft = true;
-        node.getlExpr().acceptVisitor(this);
-        Operand lOp = nowOperand;
+//        isLeft = true;
+//        node.getlExpr().acceptVisitor(this);
+//        Operand lOp = nowOperand;
         //System.out.println(node);
         isLeft = false;
         node.getrExpr().acceptVisitor(this);
         Operand rOp = nowOperand;
+
+        isLeft = true;
+        node.getlExpr().acceptVisitor(this);
+        Operand lOp = nowOperand;
+
         StoreInst inst = new StoreInst(nowBlock,rOp,lOp);
         nowBlock.push_back(inst);
         BasicReg basicReg = (BasicReg) lOp;

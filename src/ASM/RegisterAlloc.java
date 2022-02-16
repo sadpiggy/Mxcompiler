@@ -92,9 +92,9 @@ public class RegisterAlloc {
         if (target.isPhysical)return;
         boolean hadAlloc = false;
 
-        boolean debug = false;
+        //boolean debug = false;
 
-        if (!debug)
+        //if (!debug)
         for (var it : PhysicalReg.allocatablePhyRegNames){
             boolean flag = true;
             for (var reg : target.conflictRegs){
@@ -113,7 +113,7 @@ public class RegisterAlloc {
         }
 
         if (!hadAlloc){//溢出
-            System.out.println("nmsl");
+           // System.out.println("nmsl");
             target.isVirtual = false;
             target.isAddress = true;
             asmFunc.changeStackSize();

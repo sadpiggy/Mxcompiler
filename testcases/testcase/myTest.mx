@@ -1,73 +1,42 @@
 /*
-//#dump Test Package: Codegen
-//#dump Author: Yunwei Ren
-//#input shortest_path.1.in
-//#output shortest_path.1.ans
-//#dump ExitCode: 0
-//#dump InstLimit: -1
+Test Package: Codegen
+Author: 15' Haoran Ye
+Time: 2020-02-03
+Input:
+=== input ===
+=== end ===
+Output:
+=== output ===
+eternal!
+=== end ===
+ExitCode: 0
+InstLimit: -1
+Origin Package: Codegen Pretest-876
 */
-
-// input:
-// n m
-// u_1 v_1 w_1
-// ....
-// u_m v_m w_m
-// (1 <= w_m <= 100)
-
-int INF = 10000000;
-int n;
-int m;
-int[][] a;
-
-void init() {
-  n = getInt();
-  m = getInt();
-  a = new int[n][n];
-
-  int i;
-  int j;
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) {
-      a[i][j] = INF;
-    }
-  }
-  for (i = 0; i < n; ++i)
-    a[i][i] = 0;
-
-  for (i = 0; i < m; ++i) {
-    int u = getInt();
-    int v = getInt();
-    int w = getInt();
-    a[u][v] = w;
-  }
+class older{
+	int age;
+	void solveAge(){
+		int i;
+		int j;
+		int k;
+		int b;
+		for(i = 1; i < 100; i++)
+			for(j = i + 1; j < 100; j++)
+				for(k = j + 1; k < 100; k++)
+					if((i - i + i + j - j + j + k - k + k) * (100 * i + 10 * j + k) % 1926 == 0){
+					 age = (i - i + i + j - j + j + k - k + k) * (100 * i + 10 * j + k);
+					 b = 10086;
+					}
+					//printlnInt(this.age);
+	}
+};
+int main(){
+	older mrJiang = new older;
+	mrJiang.solveAge();
+	int a = mrJiang.age;
+	printlnInt(a);
+	int b = 10000;
+	if(a > b)println("eternal!");
+    return 0;
 }
 
-int main() {
-  init();
-
-  int i;
-  int j;
-  int k;
-  for (k = 0; k < n; ++k) {
-    for (i = 0; i < n; ++i) {
-      for (j = 0; j < n; ++j) {
-        if (a[i][j] > a[i][k] + a[k][j])
-          a[i][j] = a[i][k] + a[k][j];
-      }
-    }
-  }
-
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) {
-      if (a[i][j] == INF) {
-        print("-1");
-      } else {
-        print(toString(a[i][j]));
-      }
-      print(" ");
-    }
-    println("");
-  }
-
-  return 0;
-}

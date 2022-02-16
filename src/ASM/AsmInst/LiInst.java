@@ -14,8 +14,17 @@ public class LiInst extends asmInst{
         this.imm = imm;
     }
 
+    private PhysicalReg t0 = new PhysicalReg("t0","cnm");
+    private PhysicalReg t1 = new PhysicalReg("t1","cnm");
+
     @Override
     public String toString() {
+        if (rd.isAddress){
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("\tli " + t1 + ", " + imm+"\n");//sw t0, -152(s0)
+            stringBuilder.append("\tsw t1, " + rd+"(s0)");
+            return stringBuilder.toString();
+        }
         return "\tli " + rd + ", " + imm;
     }
 }

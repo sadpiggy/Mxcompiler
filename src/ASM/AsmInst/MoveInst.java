@@ -14,10 +14,6 @@ public class MoveInst extends asmInst{
         this.rd = rd;
         this.rs1 = rs1;
         this.isSp = false;
-//        if (rs1==null){
-//            System.err.println(rd.labelName);
-//        }
-
     }
     public MoveInst(AsmBlock belongTo, PhysicalReg rd, PhysicalReg rs1,boolean isSp) {
         super(belongTo);

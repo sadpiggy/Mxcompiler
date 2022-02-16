@@ -31,9 +31,20 @@ public class ITypeInst extends asmInst{
         StringBuilder stringBuilder = new StringBuilder();
 
         if (!imm.isValidImm()){//只会出现在sw (100)s0,addi sp 100
+            if (rs1.isAddress){
+                stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
+                rs1 = t1;
+            }
             stringBuilder.append( "\tli " + t2 + ", " + imm + "\n");
-            stringBuilder.append("\t" + "add" + " " + rd + ", " + rs1 + ", " + t2);
-            return stringBuilder.toString();
+            if (rd.isAddress){
+                stringBuilder.append("\t" + "add" + " " + t0 + ", " + rs1 + ", " + t2 + "\n");
+                stringBuilder.append("\t" + "sw " + t0 + ", " + rd.toString() + "(s0)" );
+                rs1 = rs1_mid;
+                return stringBuilder.toString();
+            }else {
+                stringBuilder.append("\t" + "add" + " " + rd + ", " + rs1 + ", " + t2);
+                return stringBuilder.toString();
+            }
         }
 
         if (rs1.isAddress){
