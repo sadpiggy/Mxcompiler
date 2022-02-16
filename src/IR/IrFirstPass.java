@@ -708,7 +708,10 @@ public class IrFirstPass implements AstVisitor {//似乎可以2pass处理
 
             BrInst condBrinst = new BrInst(nowBlock,nowOperand, bodyBlock.label,nextBlock.label);
             nowBlock.push_back(condBrinst);
-        }else nowBlock.push_back(new BrInst(nowBlock, bodyBlock.label));
+        }else {
+            nowBlock.push_back(new BrInst(nowBlock, bodyBlock.label));
+            nowBlock.insts.getFirst().isLoopBegin = true;
+        }
         nowBlock = bodyBlock;
         nowFunc.setBlock(bodyBlock);
         node.getStmt().acceptVisitor(this);

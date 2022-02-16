@@ -590,6 +590,8 @@ public class InstSelector {//构造函数那里有bug
             }else if (pointer.isAddress){
                 currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(pointer.offset),value,s0));
             }else {
+                //System.out.println(inst.pointer);
+                //System.out.println(pointer);
                 currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(0),value,pointer));
             }
         }
