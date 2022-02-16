@@ -1,100 +1,75 @@
 /*
 Test Package: Codegen
-Author: YifanXu
-Time: 2020-04-09
+Author: 16' Yuxi Liu
+Time: 2020-02-03
 Input:
 === input ===
-4 5
-1 2 2
-1 3 2
-1 4 3
-2 3 4
-3 4 3
+10
 === end ===
 Output:
 === output ===
-7
+1
+2
+2
+4
+2
+6
+4
+6
+4
 === end ===
 ExitCode: 0
 InstLimit: -1
+Origin Package: Codegen Pretest-947
 */
 
-class Edge {
-	int x;
-	int y;
-	int nxt;
-	int w;
-};
+//考察点：section 8 语句，包括if,while,for,break,continue,return等
+//算法：线性筛法求欧拉函数
+//样例输入：10
+//样例输出：
+//1
+//2
+//2
+//4
+//2
+//6
+//4
+//6
+//4
 
-int MAX = 1000000;
-int n;
-int m;
-int tot = 0;
-int ans = 0;
-
-int[] pick;
-int[] fst;
-int[] dis;
-
-Edge[] ed;
-
-void addedge(int x, int y, int w) {
-	++tot;
-	ed[tot] = new Edge;
-	ed[tot].x = x;
-	ed[tot].y = y;
-	ed[tot].w = w;
-	ed[tot].nxt = fst[x];
-	fst[x] = tot;
-}
+int N;
+int M = 0;
+bool[] check;
 
 int main() {
-    n = getInt();
-    m = getInt();
-    pick = new int[n + 1];
-    fst = new int[n + 1];
-    dis = new int[n + 1];
-    ed = new Edge[2 * m + 1];
-    int i;
-	for (i = 0; i <= n; ++i) {
-		pick[i] = 0;
-        fst[i] = 0;
-        dis[i] = MAX;
-	}
-	int x;
-    int y;
-    int w;
-	for (i = 1; i <= m; ++i) {
-		x = getInt();
-        y = getInt();
-        w = getInt();
-		addedge(x, y, w);
-		addedge(y, x, w);
-	}
-	x = 1;
-	for (i = 1; i <= n - 1; ++i) {
-		pick[x] = 1;
-        int j;
-		for (j = fst[x]; j != 0; j = ed[j].nxt) {
-			int y = ed[j].y;
-
-			if (pick[y] == 0 && ed[j].w < dis[y]) {
-				dis[y] = ed[j].w;
+    N = getInt();
+	check = new bool[N+5];
+	int i = 0;
+	while ( i <= N ) check[i++] = true;
+	int[] phi = new int[N+5];
+	int[] P = new int[N+5];
+	phi[1] = 1;
+	for (i = 2; ; ++i ) {
+		if ( i > N ) break;
+		if ( check[i] ) {
+			P[++M] = i;
+			phi[i] = i - 1;
+		}
+		int k = i;
+		int i;
+		for (i = 1; i <= M && (k * P[i] <= N); i++) {
+			int tmp = k * P[i];
+			if ( tmp > N ) continue;
+			check[tmp] = false;
+			if ( k % P[i] == 0) {
+				phi[tmp] = phi[k] * P[i];
+				break;
+			}
+			else {
+				phi[k * P[i]] = phi[k] * (P[i] - 1);
 			}
 		}
-		x = 0;
-		for (j = 1; j <= n; ++j) {
-			if (pick[j] == 0 && dis[j] < dis[x]) {
-				x = j;
-			}
-		}
-		if (x == 0) {
-			printInt(-1);
-			return 0;
-		}
-		ans = ans + dis[x];
-
+		println(toString(phi[k]));
 	}
-	printInt(ans);
-	return 0;
+    return 0;
 }

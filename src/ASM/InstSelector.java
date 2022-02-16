@@ -125,16 +125,25 @@ public class InstSelector {//构造函数那里有bug
             if (isLeft){
                 if (!currentAsmFunc.containReg(register.name))
                 {
-                    if (loopDepth==0||!operand.isAlloc)
-                    return currentAsmFunc.newPhyReg(register.name);
-                    else return currentAsmFunc.newPhyReg(register.name,live);
+                    if (loopDepth==0||!operand.isAlloc) {
+                        return currentAsmFunc.newPhyReg(register.name);
+                    }
+                    else {
+                        return currentAsmFunc.newPhyReg(register.name,live);
+                    }
                 }
                 if (loopDepth==0||!operand.isAlloc)return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
-                else return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),live);
+                else {
+                    //if (operand.isAlloc)System.out.println("lalala");
+                    return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),live);
+                }
             }else {
                 if (operand.isAlloc)
                 return currentAsmFunc.getPhyReg(register.name,liveEnd);
-                else return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd());
+                else {
+                    //System.out.println("lalala");
+                    return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd());
+                }
             }
         }else if (operand instanceof IntegerConst){
             IntegerConst integerConst = (IntegerConst) operand;
@@ -561,10 +570,10 @@ public class InstSelector {//构造函数那里有bug
         PhysicalReg pointer = null;//= getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),true);
         PhysicalReg value = null;//getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),false);
         if (loopDepth!=0){
-            pointer = getPhysicalReg(inst.pointer,false,live,false);
+            pointer = getPhysicalReg(inst.pointer,true,live,false);
             value = getPhysicalReg(inst.value,false,live,true);
         }else {
-            pointer = getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),false);
+            pointer = getPhysicalReg(inst.pointer,true,currentAsmFunc.getLiveEnd(),false);
             value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),true);
         }
 
