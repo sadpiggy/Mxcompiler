@@ -8,11 +8,12 @@ public class PhysicalReg extends AsmReg{
     public String phyType;
     public boolean isVirtual;
     public boolean isAddress;
+    public boolean isPhysical;
     public int offset;
-    public int liveStart = 0;
-    public int liveEnd = 0;
+    public LinkedList<liveValue> liveStart = new LinkedList<>();
+    public LinkedList<liveValue> liveEnd = new LinkedList<>();
     public LinkedList<PhysicalReg>conflictRegs;
-    public boolean hadAlloc = false;
+    //public boolean hadAlloc = false;
     public boolean isDead = false;
    // public int conflictSize = -1;
 
@@ -42,9 +43,9 @@ public class PhysicalReg extends AsmReg{
 //    };
 
     public static String[] allocatablePhyRegNames = {
-            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11",
              "t3", "t4", "t5", "t6",
             "a1", "a2", "a3", "a4", "a5", "a6", "a7",//为什么？？？
+            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11",
     };
 
 //    public static String[] allocatablePhyRegNames = {
@@ -59,6 +60,7 @@ public class PhysicalReg extends AsmReg{
         this.phyType = phyType;
         isVirtual = false;
         isAddress = false;
+        isPhysical = true;
         offset = 0;
         this.labelName = labelName;
         conflictRegs = new LinkedList<>();
@@ -70,6 +72,7 @@ public class PhysicalReg extends AsmReg{
         this.isAddress = true;
         this.isVirtual = false;
         this.labelName = labelName;
+        this.isPhysical = false;
         conflictRegs = new LinkedList<>();
     }
 
@@ -78,6 +81,7 @@ public class PhysicalReg extends AsmReg{
         this.isAddress = false;
         this.phyType = "virtual";
         this.labelName = labelName;
+        this.isPhysical = false;
         offset = 0;
         conflictRegs = new LinkedList<>();
     }

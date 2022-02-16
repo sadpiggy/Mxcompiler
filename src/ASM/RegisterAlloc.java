@@ -21,18 +21,14 @@ public class RegisterAlloc {
     public void foolishAlloc(){
         ArrayList<PhysicalReg> registers = new ArrayList<>();//asmFunc.registers
         for (var it : asmFunc.registers){
-            if (it.isVirtual){
+            if (!it.isAddress){
                 registers.add(it);
             }
         }
         boolean value = true;
         while (value){
             value = deleteNode(registers);
-            //System.out.println("ml");
         }
-//        for (var it : registers){
-//            allocSingle(it);
-//        }
 
         while (registers.size()!=0){
             PhysicalReg reg = registers.get(0);
@@ -50,7 +46,7 @@ public class RegisterAlloc {
             allocSingle(regStack.pop());
         }
 
-        clearCallerSave();
+       // clearCallerSave();
     }
 
     public void alloverflow(){
@@ -74,7 +70,7 @@ public class RegisterAlloc {
         boolean value = false;
         ArrayList<PhysicalReg>deleteList = new ArrayList<>();
         for (var it : registers){
-            if (it.conflictRegs.size()<allocRegSize){
+            if (it.conflictRegs.size()<allocRegSize&&(!it.isPhysical)){
                 for (var reg : it.conflictRegs){
                     if (reg.conflictRegs.contains(it)){
                         reg.deleteConflict(it);
@@ -93,11 +89,16 @@ public class RegisterAlloc {
     }
 
     void allocSingle(PhysicalReg target){
+        if (target.isPhysical)return;
         boolean hadAlloc = false;
+
+        boolean debug = false;
+
+        if (!debug)
         for (var it : PhysicalReg.allocatablePhyRegNames){
             boolean flag = true;
             for (var reg : target.conflictRegs){
-                if (/*!reg.isVirtual&& */Objects.equals(reg.phyType, it)){
+                if (reg.isPhysical&&Objects.equals(reg.phyType, it)){
                     flag = false;
                     break;
                 }
@@ -105,12 +106,14 @@ public class RegisterAlloc {
             if (flag){
                 target.isVirtual=false;
                 target.phyType = it;
+                target.isPhysical = true;
                 hadAlloc = true;
                 break;
             }
         }
+
         if (!hadAlloc){//溢出
-            //  System.out.println("nmsl");
+            System.out.println("nmsl");
             target.isVirtual = false;
             target.isAddress = true;
             asmFunc.changeStackSize();
@@ -119,27 +122,36 @@ public class RegisterAlloc {
         }
     }
 
-    void clearCallerSave(){
-        //System.out.println(asmFunc.callerSaveInsts.size());
-        for (int i=asmFunc.callerSaveInsts.size()-1;i>=0;i--){
-            asmInst inst = asmFunc.callerSaveInsts.get(i);
-            asmInst next = inst.nextInst;
-            inst.isDead = true;
-            while (next!=null){
-                if (!next.isDead){
-                    if (Objects.equals(next.getRdName(), inst.getRs1Name()))break;
-                    if (Objects.equals(next.getRs1Name(), inst.getRs1Name())){
-                        next.rs1 = inst.rd;
-                        inst.isDead = false;
-                    }
-                    if (Objects.equals(next.getRs2Name(), inst.getRs1Name())){
-                        next.rs2 = inst.rd;
-                        inst.isDead = false;
-                    }
-                }
-                next = next.nextInst;
-            }
+    void moveClear(){// mv rd rs, mv rs rd
+        for (int i =0;i< asmFunc.insts.size();i++){
+            asmInst target = asmFunc.insts.get(i);
+            PhysicalReg rs = target.rs1;
+            PhysicalReg rd = target.rd;
+
         }
     }
+
+//    void clearCallerSave(){
+//        //System.out.println(asmFunc.callerSaveInsts.size());
+//        for (int i=asmFunc.callerSaveInsts.size()-1;i>=0;i--){
+//            asmInst inst = asmFunc.callerSaveInsts.get(i);
+//            asmInst next = inst.nextInst;
+//            inst.isDead = true;
+//            while (next!=null){
+//                if (!next.isDead){
+//                    if (Objects.equals(next.getRdName(), inst.getRs1Name()))break;
+//                    if (Objects.equals(next.getRs1Name(), inst.getRs1Name())){
+//                        next.rs1 = inst.rd;
+//                        inst.isDead = false;
+//                    }
+//                    if (Objects.equals(next.getRs2Name(), inst.getRs1Name())){
+//                        next.rs2 = inst.rd;
+//                        inst.isDead = false;
+//                    }
+//                }
+//                next = next.nextInst;
+//            }
+//        }
+//    }
 
 }

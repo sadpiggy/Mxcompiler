@@ -32,7 +32,7 @@ public class RTypeInst extends asmInst{
             rs1 = t1;
         }
         if (rs2.isAddress){
-            stringBuilder.append("\t" + "lw	"+ t2 + ", " + rs1.toString() + "(s0)\n");
+            stringBuilder.append("\t" + "lw	"+ t2 + ", " + rs2.toString() + "(s0)\n");
             rs2 = t2;
         }
         if (rd.isAddress){

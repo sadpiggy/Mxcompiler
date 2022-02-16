@@ -34,6 +34,12 @@ public class StoreInst extends asmInst{
             stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs2.toString() + "(s0)\n");
             rs2 = t1;
         }
+
+        if (rs1.isAddress){
+            stringBuilder.append("\t" + "lw	"+ t2 + ", " + rs1.toString() + "(s0)\n");
+            rs1 = t2;
+        }
+
         if (offset.isValidImm()) {
             stringBuilder.append("\t" + op + " " + rs2 + ", " + offset + "(" + rs1 + ")");
         }else {

@@ -13,26 +13,34 @@ public class ConflictAnalise {
         ArrayList<PhysicalReg> registers = asmFunc.registers;
         //建边是单向还是双向呢 //双向吧
 
-//        for (var it : registers){
-//            if (it.isVirtual)
-//            System.out.println(it.liveStart+"  "+ it.liveEnd);
-//        }
 
         for (int i=0;i< registers.size();i++){
             PhysicalReg phyI = registers.get(i);
             for (int j=i+1;j< registers.size();j++){
                 //System.out.println(phyI.);
                 PhysicalReg phyJ = registers.get(j);
-                if (phyI.isVirtual&&phyJ.isVirtual){
+                if (!phyI.isAddress&&!phyJ.isAddress){
                     //System.out.println("gi");
-                    if (phyI.liveStart> phyI.liveEnd)phyI.liveEnd = phyI.liveStart;
-                    if (phyJ.liveStart> phyJ.liveEnd)phyJ.liveEnd = phyJ.liveStart;
-                    if (!(phyI.liveEnd<phyJ.liveStart||phyI.liveStart>phyJ.liveEnd)){
-                        //phyI.conflictRegs.push(phyJ);
-                        //phyJ.conflictRegs.push(phyI);
-                        phyI.addConflict(phyJ);
-                        phyJ.addConflict(phyI);
-                    }
+                    boolean hasConflict = false;
+                   for (int m = 0;m<phyI.liveStart.size();m++){
+                       for (int n=0;n<phyJ.liveStart.size();n++){
+                           if (phyI.liveStart.get(m).value> phyI.liveEnd.get(m).value){
+                               phyI.liveEnd.get(m).value = phyI.liveStart.get(m).value;
+                           }
+                           if (phyJ.liveStart.get(n).value> phyJ.liveEnd.get(n).value){
+                               phyJ.liveEnd.get(n).value = phyJ.liveStart.get(n).value;
+                           }
+                           if (!(phyI.liveEnd.get(m).value<phyJ.liveStart.get(n).value||phyI.liveStart.get(m).value>phyJ.liveEnd.get(n).value)){
+                               hasConflict = true;
+                               break;
+                           }
+                       }
+                       if (hasConflict)break;
+                   }
+                   if (hasConflict){
+                       phyI.addConflict(phyJ);
+                       phyJ.addConflict(phyI);
+                   }
                 }
             }
         }

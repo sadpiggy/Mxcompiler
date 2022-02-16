@@ -13,6 +13,9 @@ public class AllocInst extends Inst{
     public AllocInst(LlvmSingleValueType type,Operand destReg, IrBlock irBlock) {
         super(destReg, irBlock);
         //this.type = type;
+
+        destReg.isAlloc = true;
+
         this.type = type;
         if (this.type instanceof LlvmPointerType){
             alignSize = 8;

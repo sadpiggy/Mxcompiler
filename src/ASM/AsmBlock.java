@@ -57,7 +57,9 @@ public class AsmBlock {
     public void printAsm() throws FileNotFoundException {
         System.out.println(".L" + name+":\n");
         for (var it : insts){
-            if (!Objects.equals(it.toString(), ""))System.out.println(it.toString());
+            if (!Objects.equals(it.toString(), "")){
+                System.out.println(it.toString());
+            }
         }
     }
 

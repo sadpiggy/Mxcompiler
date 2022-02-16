@@ -2,6 +2,8 @@ package ASM.AsmOperand;
 
 import ASM.AsmBlock;
 import ASM.AsmFunc;
+import ASM.AsmInst.MoveInst;
+import ASM.AsmInst.RetInst;
 import ASM.ConflictAnalise;
 import ASM.RegisterAlloc;
 
@@ -24,14 +26,37 @@ public class AsmRoot {
     public void regsAlloc(){
         for (var it : asmFuncs){
             if (!it.isBuildIn){
+                it.setInsts();
                 ConflictAnalise conflictAnalise = new ConflictAnalise(it);
                 conflictAnalise.run();
                 RegisterAlloc registerAlloc = new RegisterAlloc(it);
                 registerAlloc.foolishAlloc();
                // registerAlloc.alloverflow();
+
+                for (var target : it.insts){
+                    if (!target.isDead&&target.rd!=null&&!target.rd.isAddress){
+                        it.moveInsts.push(target.rd.toString());
+                    }
+                }
+
+                PhysicalReg[] savaRegs = new PhysicalReg[11];
+
+                it.blocks.getLast().insts.removeLast();
+
+                for (int index=1;index<=11;index++){
+                    if (it.moveInsts.contains("s"+index)){
+                        savaRegs[index-1] = new PhysicalReg(it.name+"_s"+index,-it.changeStackSize());
+                        it.blocks.getFirst().push_front(new MoveInst(it.blocks.getFirst(),savaRegs[index-1], new PhysicalReg("s"+index,"s"+index),true));
+                        it.blocks.getLast().push_back(new MoveInst(it.blocks.getLast(), new PhysicalReg("s"+index,"s"+index),savaRegs[index-1],true));
+                    }
+                }
+
+                it.blocks.getLast().push_back(new RetInst(it.blocks.getLast()));
+
                 it.setStackSize();
                 it.headSpInst.imm = new IntegerImm(-it.stackSize);
                 it.tailSpInst.imm = new IntegerImm(it.stackSize);
+
             }
         }
     }
@@ -74,28 +99,6 @@ public class AsmRoot {
                         "\t.L.str.3:\n" +
                         "\t.asciz\t\"%d\\n\"\n" );
 
-
-//       printStream.println(
-//               "\t.type\t.L.str,@object          # @.str\n" +
-//               "\t.section\t.rodata.str1.1,\"aMS\",@progbits,1\n" +
-//               "\t.L.str:\n" +
-//               "\t.asciz\t\"%s\"\n" +
-//               "\t.size\t.L.str, 3\n" +
-//               "\n" +
-//               "\t.type\t.L.str.1,@object        # @.str.1\n" +
-//               "\t.L.str.1:\n" +
-//               "\t.asciz\t\"%s\\n\"\n" +
-//               "\t.size\t.L.str.1, 4\n" +
-//               "\n" +
-//               "\t.type\t.L.str.2,@object        # @.str.2\n" +
-//               "\t.L.str.2:\n" +
-//               "\t.asciz\t\"%d\"\n" +
-//               "\t.size\t.L.str.2, 3\n" +
-//               "\n" +
-//               "\t.type\t.L.str.3,@object        # @.str.3\n" +
-//               "\t.L.str.3:\n" +
-//               "\t.asciz\t\"%d\\n\"\n" +
-//               "\t.size\t.L.str.3, 4");
 
         printStream.println();
 

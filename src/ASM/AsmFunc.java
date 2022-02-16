@@ -1,8 +1,10 @@
 package ASM;
 
 import ASM.AsmInst.ITypeInst;
+import ASM.AsmInst.MoveInst;
 import ASM.AsmInst.asmInst;
 import ASM.AsmOperand.PhysicalReg;
+import ASM.AsmOperand.liveValue;
 import IR.IrBlock;
 import IR.inst.Inst;
 import IR.operand.Register;
@@ -24,9 +26,15 @@ public class AsmFunc {
     public ITypeInst headSpInst = null;
     public ITypeInst tailSpInst = null;
     public LinkedList<asmInst>insts = null;
-    public LinkedList<asmInst>calleeSaveInsts1 = new LinkedList<>();
-    public LinkedList<asmInst>calleeSaveInsts2 = new LinkedList<>();
-    public LinkedList<asmInst>callerSaveInsts = new LinkedList<>();
+    private int callTag = 0;
+    public LinkedList<String>moveInsts = new LinkedList<>();
+//    public LinkedList<asmInst>calleeSaveInsts1 = new LinkedList<>();
+//    public LinkedList<asmInst>calleeSaveInsts2 = new LinkedList<>();
+//    public LinkedList<asmInst>callerSaveInsts = new LinkedList<>();
+
+    public int getCallTag(){
+        return callTag++;
+    }
 
     public ArrayList<PhysicalReg> registers;//0base
 
@@ -36,6 +44,7 @@ public class AsmFunc {
     }
 
     public void setInsts(){
+        insts = new LinkedList<>();
         for (var block : blocks){
             if (insts.size()!=0)insts.getLast().nextInst = block.insts.getFirst();
             for (var inst : block.insts){
@@ -44,28 +53,73 @@ public class AsmFunc {
         }
     }
 
-    public int getLiveEnd(){
-        return registers.size();
+    public liveValue getLiveEnd(){
+        return new liveValue(registers.size());
     }
 
     public PhysicalReg newPhyReg(String labelName){
         PhysicalReg physicalReg = new PhysicalReg(labelName);//virtual
-        setPhyReg(physicalReg);
+        setPhyReg(physicalReg,getLiveEnd(),getLiveEnd());
         return physicalReg;
     }
 
-    public PhysicalReg getPhyReg(String name, int liveEnd){
+    public PhysicalReg newPhyReg(String labelName,liveValue liveEnd){
+        PhysicalReg physicalReg = new PhysicalReg(labelName);//virtual
+        setPhyReg(physicalReg,getLiveEnd(),liveEnd);
+        return physicalReg;
+    }
+
+    public PhysicalReg newPhyReg(String phyType,String labelName){
+        PhysicalReg physicalReg = new PhysicalReg(phyType,labelName);//phy
+        setPhyReg(physicalReg,getLiveEnd(),getLiveEnd());
+        return physicalReg;
+    }
+
+    public PhysicalReg newPhyReg(String phyType,String labelName,liveValue liveEnd){
+        PhysicalReg physicalReg = new PhysicalReg(phyType,labelName);//phy
+        setPhyReg(physicalReg,getLiveEnd(),liveEnd);
+        return physicalReg;
+    }
+
+    public boolean containReg(String name){
         for (var it : registers){
             if (Objects.equals(it.labelName, name)){
-                it.liveEnd = liveEnd;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PhysicalReg getPhyReg(String name, liveValue liveEnd){
+        for (var it : registers){
+            if (Objects.equals(it.labelName, name)){
+                //it.liveEnd.getLast().value = liveEnd.value;
+                //it.liveEnd.removeLast();
+                //it.liveEnd.addLast(liveEnd);
+                if (!it.liveEnd.getLast().notChange){
+                    it.liveEnd.removeLast();
+                    it.liveEnd.addLast(liveEnd);
+                }
                 return it;
             }
         }
         return null;
     }
 
-    public void setPhyReg(PhysicalReg physicalReg){//新产生一个register
-        physicalReg.liveStart = physicalReg.liveEnd = registers.size();
+    public PhysicalReg getPhyReg(String name, liveValue liveStart,liveValue liveEnd){
+        for (var it : registers){
+            if (Objects.equals(it.labelName, name)){
+                it.liveStart.addLast(liveStart);
+                it.liveEnd.addLast(liveEnd);
+                return it;
+            }
+        }
+        return null;
+    }
+
+    public void setPhyReg(PhysicalReg physicalReg,liveValue liveStart,liveValue liveEnd){//新产生一个register
+        physicalReg.liveStart.addLast(liveStart);//registers.size();
+        physicalReg.liveEnd.addLast(liveEnd);
         registers.add(physicalReg);
     }
 
@@ -86,17 +140,41 @@ public class AsmFunc {
 //sjkdc
     public void printAsm(int i) throws FileNotFoundException {
         if (!isBuildIn){
+
+//            for (var it : insts){
+//                if (!it.isDead&&it.rd!=null&&!it.rd.isAddress){
+//                    moveInsts.push(it.rd.toString());
+//                }
+//            }
+//
+//            PhysicalReg[] savaRegs = new PhysicalReg[11];
+//
+//            for (int index=1;index<=11;index++){
+//                if (moveInsts.contains("s"+index)){
+//                    savaRegs[index-1] = new PhysicalReg(name+"_s"+index,-changeStackSize());
+//                    blocks.getFirst().push_front(new MoveInst(blocks.getFirst(),savaRegs[index-1], new PhysicalReg("s"+index,"s"+index),true));
+//                    blocks.getLast().push_back(new MoveInst(blocks.getLast(), new PhysicalReg("s"+index,"s"+index),savaRegs[index-1],true));
+//                }
+//            }
+
+
+
             System.out.println("\t.globl\t" + name +  "\n" +
                     "\t.p2align\t2\n" +
                       name + ":\n"        +
                     "\t.cfi_startproc\n" + "# %bb.0:");
+
+
+
             for (var it : blocks)it.printAsm();
+
             System.out.println(".Lfunc_endf" + i+ ":\n" +
                     "\t.size\t" + name + ", .Lfunc_endf" + i + "-" + name + "\n" +
                     "\t.cfi_endproc\n" +
                     "                                        # -- End function");
 
-        }else {
+        }else
+        {
             switch (name) {
                 //buildIn
                 case "print": {

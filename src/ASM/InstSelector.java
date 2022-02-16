@@ -30,6 +30,11 @@ public class InstSelector {//构造函数那里有bug
     public AsmFunc currentAsmFunc;
     public AsmBlock currentAsmBlock;
     public AsmBlock tailBlock;
+    public liveValue live = new liveValue(0);
+    public int loopDepth = 0;
+    //public liveValue oldLive = null;
+   // boolean isInLoop = false;
+    //boolean oldInLoop = false;
 
     public PhysicalReg sp;
     public PhysicalReg ra;
@@ -113,11 +118,18 @@ public class InstSelector {//构造函数那里有bug
 
 
 
-    public PhysicalReg getPhysicalReg(Operand operand,boolean isLeft,int liveEnd,boolean isRs1){
+    public PhysicalReg getPhysicalReg(Operand operand,boolean isLeft,liveValue liveEnd,boolean isRs1){
         if (operand instanceof Register){
             Register register = (Register) operand;
             if (isLeft){
-                return currentAsmFunc.newPhyReg(register.name);
+                if (!currentAsmFunc.containReg(register.name))
+                {
+                    if (loopDepth==0)
+                    return currentAsmFunc.newPhyReg(register.name);
+                    else return currentAsmFunc.newPhyReg(register.name,live);
+                }
+                if (loopDepth==0)return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
+                else return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),live);
             }else {
                 return currentAsmFunc.getPhyReg(register.name,liveEnd);
             }
@@ -194,11 +206,13 @@ public class InstSelector {//构造函数那里有bug
             for (int i=0;i<irFunc.formParams.size();i++){
                 if (i<=7){//
                     Register register = irFunc.formParams.get(i);
-                    currentAsmFunc.setPhyReg(new PhysicalReg("a"+i, register.name));
+                    //System.out.println(register.name);
+                    currentAsmFunc.setPhyReg(new PhysicalReg("a"+i, register.name), currentAsmFunc.getLiveEnd(), currentAsmFunc.getLiveEnd());
+                   // System.out.println(currentAsmFunc.getPhyReg(register.name,new liveValue(0)));
                 }else {
                     Register register = irFunc.formParams.get(i);
                     overflowSize+=4;
-                    currentAsmFunc.setPhyReg(new PhysicalReg(register.name,-overflowSize));
+                    currentAsmFunc.setPhyReg(new PhysicalReg(register.name,-overflowSize), currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
                     currentAsmFunc.changeStackSize();
                 }
 
@@ -217,27 +231,14 @@ public class InstSelector {//构造函数那里有bug
 
         boolean should_save = true;
 
-
-        if (should_save){
-            for (int i=1;i<=11;i++){
-                asmInst inst = new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()), sRegs.get(i-1), sp);
-                currentAsmBlock.push_front(inst);currentAsmFunc.calleeSaveInsts1.addLast(inst);inst.specialTag = "s" + i;
-            }
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s2,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s3,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s4,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s5,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s6,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s7,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s8,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s9,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s10,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),s11,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),t3,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),t4,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),t5,sp));
-//            currentAsmBlock.push_front(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.changeStackSize()),t6,sp));
-        }
+//        PhysicalReg[] savaRegs = new PhysicalReg[11];
+//
+//        if (should_save){
+//            for (int i=1;i<=11;i++){
+//                savaRegs[i-1] = new PhysicalReg(irFunc.name+"_s"+i,-currentAsmFunc.changeStackSize());
+//                currentAsmBlock.push_front(new MoveInst(currentAsmBlock,savaRegs[i-1], sRegs.get(i-1),true));
+//            }
+//        }
 
         tailBlock = new AsmBlock(irFunc.name+"_tail",currentAsmFunc);
 
@@ -262,27 +263,13 @@ public class InstSelector {//构造函数那里有bug
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s0,sp,new IntegerImm(s0Address)));
         currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,ra,sp,new IntegerImm(raAddress)));
 
-        if(should_save){
-            for (int i=1;i<=11;i++){
-                asmInst inst = new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw, sRegs.get(i-1), sp,new IntegerImm(s0Address-4*i));
-                currentAsmBlock.push_back(inst);currentAsmFunc.calleeSaveInsts2.addLast(inst);inst.specialTag = "s"+i;
-            }
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s1,sp,new IntegerImm(s0Address-4)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s2,sp,new IntegerImm(s0Address-8)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s3,sp,new IntegerImm(s0Address-12)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s4,sp,new IntegerImm(s0Address-16)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s5,sp,new IntegerImm(s0Address-20)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s6,sp,new IntegerImm(s0Address-24)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s7,sp,new IntegerImm(s0Address-28)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s8,sp,new IntegerImm(s0Address-32)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s9,sp,new IntegerImm(s0Address-36)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s10,sp,new IntegerImm(s0Address-40)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,s11,sp,new IntegerImm(s0Address-44)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t3,sp,new IntegerImm(s0Address-48)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t4,sp,new IntegerImm(s0Address-52)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t5,sp,new IntegerImm(s0Address-56)));
-//            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t6,sp,new IntegerImm(s0Address-60)));
-        }
+//        if(should_save){
+//            for (int i=1;i<=11;i++){
+//                currentAsmBlock.push_back(new MoveInst(currentAsmBlock, sRegs.get(i-1),savaRegs[i-1] ,true));
+//                //asmInst inst = new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw, sRegs.get(i-1), sp,new IntegerImm(s0Address-4*i));
+//               // currentAsmBlock.push_back(inst);currentAsmFunc.calleeSaveInsts2.addLast(inst);inst.specialTag = "s"+i;
+//            }
+//        }
 
         currentAsmBlock.push_back(new ASM.AsmInst.RetInst(currentAsmBlock));
         currentAsmFunc.setBlock(tailBlock);
@@ -291,6 +278,15 @@ public class InstSelector {//构造函数那里有bug
     public void visitIrBlock(IrBlock irBlock){
         for(var it : irBlock.insts){
             //System.out.println(it);
+
+            if (it.isLoopBegin){
+                liveValue newLive = new liveValue(0);
+                newLive.notChange = true;
+                newLive.oldLive = live;
+                live = newLive;
+                loopDepth++;
+            }
+
             if (it instanceof AllocInst){
                 visitAllocInst((AllocInst) it);
             }else if (it instanceof BinaryInst){
@@ -321,19 +317,33 @@ public class InstSelector {//构造函数那里有bug
 
 
     public void visitAllocInst(AllocInst inst) {
-        //System.out.println("kfk");
         Register register = (Register) inst.destReg;
-        currentAsmFunc.changeStackSize();
-        //currentAsmFunc.stackSize += 4;//inst.alignSize;
-        currentAsmFunc.setPhyReg(new PhysicalReg(register.name,-currentAsmFunc.stackSize));
+
+//        currentAsmFunc.changeStackSize();
+//        currentAsmFunc.setPhyReg(new PhysicalReg(register.name,-currentAsmFunc.stackSize));
+        currentAsmFunc.setPhyReg(new PhysicalReg(register.name), currentAsmFunc.getLiveEnd(), currentAsmFunc.getLiveEnd());
     }
 
     public void visitBinaryInst(BinaryInst inst) {
-        currentAsmFunc.changeStackSize();
+//        if (inst.isLoopBegin){
+//            //oldLive = live;
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
+        currentAsmFunc.changeStackSize();//这个是干嘛的？ todo
         Register destReg = (Register) inst.destReg;
-        PhysicalReg rd = getPhysicalReg(destReg,true,0,false);
-        PhysicalReg value1 = getPhysicalReg(inst.value1, false,rd.liveStart, true);
-        PhysicalReg value2 = getPhysicalReg(inst.value2, false, rd.liveStart, false);
+        PhysicalReg rd = null;//getPhysicalReg(destReg,true,0,false);
+        PhysicalReg value1 = null;//getPhysicalReg(inst.value1, false,rd.liveStart, true);
+        PhysicalReg value2 = null;//getPhysicalReg(inst.value2, false, rd.liveStart, false);
+        if (loopDepth==0){
+            rd = getPhysicalReg(destReg,true,new liveValue(0),false);
+            value1 = getPhysicalReg(inst.value1, false, currentAsmFunc.getLiveEnd(), true);
+            value2 = getPhysicalReg(inst.value2, false, currentAsmFunc.getLiveEnd(), false);
+        }else {
+            rd = getPhysicalReg(destReg,true,live,false);
+            value1 = getPhysicalReg(inst.value1, false,live, true);
+            value2 = getPhysicalReg(inst.value2, false, live, false);
+        }
 
         switch (inst.instOp){
             case add:currentAsmBlock.push_back(new RTypeInst(currentAsmBlock, RTypeInst.RTypeOp.add,rd,value1,value2));break;
@@ -351,47 +361,55 @@ public class InstSelector {//构造函数那里有bug
     }
 
     public void visitBitCastInst(BitcastInst inst) {
-        PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
-        PhysicalReg value = getPhysicalReg(inst.value, false,dest.liveStart,true);
+        PhysicalReg dest = null;//getPhysicalReg(inst.destReg, true,0,false);
+        PhysicalReg value = null;//getPhysicalReg(inst.value, false,dest.liveStart,true);
+        if (loopDepth==0){
+            dest = getPhysicalReg(inst.destReg, true,new liveValue(0),false);
+            value = getPhysicalReg(inst.value, false,dest.liveStart.getLast(),true);
+        }else {
+            dest = getPhysicalReg(inst.destReg, true,live,false);
+            value = getPhysicalReg(inst.value, false,live,true);
+        }
+        //if (value==null)System.out.println("nmsl");
         currentAsmBlock.push_back(new MoveInst(currentAsmBlock,dest,value));
     }
 
     public void visitBrInst(BrInst inst) {
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
+
         if (inst.condition==null){
             currentAsmBlock.push_back(new JInst(currentAsmBlock,inst.trueBranch.getName()));
         }else {
             //这个很可能有问题
-            currentAsmBlock.push_back(new ASM.AsmInst.BrInst(currentAsmBlock, ASM.AsmInst.BrInst.BrTypeOp.beqz,getPhysicalReg(inst.condition,false, currentAsmFunc.getLiveEnd(), true),inst.falseBranch.getName()));
+            if(loopDepth==0)currentAsmBlock.push_back(new ASM.AsmInst.BrInst(currentAsmBlock, ASM.AsmInst.BrInst.BrTypeOp.beqz,getPhysicalReg(inst.condition,false, currentAsmFunc.getLiveEnd(), true),inst.falseBranch.getName()));
+            else currentAsmBlock.push_back(new ASM.AsmInst.BrInst(currentAsmBlock, ASM.AsmInst.BrInst.BrTypeOp.beqz,getPhysicalReg(inst.condition,false, live, true),inst.falseBranch.getName()));
             currentAsmBlock.push_back(new JInst(currentAsmBlock,inst.trueBranch.getName()));
         }
+
+        if (inst.isLoopEnd){
+            loopDepth--;
+            live.value = currentAsmFunc.getLiveEnd().value;
+            live.notChange = false;
+
+            live = live.oldLive;
+
+        }
+
     }
 
     public void visitCallInst(CallInst inst) {
-        //之后考虑溢出//考虑溢出
-
-       // int[] sizes = new int[11];//a1 - a7;t3 - t6
 
         for (int i=0;i<=10;i++){
-            PhysicalReg address = new PhysicalReg("label"+i,-currentAsmFunc.changeStackSize());
-            asmInst asmInst = new MoveInst(currentAsmBlock,address, atRegs.get(i));
-            currentAsmBlock.push_back(asmInst);currentAsmFunc.callerSaveInsts.addLast(asmInst);
+            currentAsmFunc.newPhyReg(atRegs.get(i).phyType,atRegs.get(i).phyType);
         }
 
-//        currentAsmFunc.changeStackSize();size0 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t0,s0));
-//        currentAsmFunc.changeStackSize();size1 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t1,s0));
-//        currentAsmFunc.changeStackSize();size2 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t2,s0));
-
-//        currentAsmFunc.changeStackSize();size3 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t3,s0));
-//        currentAsmFunc.changeStackSize();size4 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t4,s0));
-//        currentAsmFunc.changeStackSize();size5 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t5,s0));
-//        currentAsmFunc.changeStackSize();size6 = currentAsmFunc.stackSize;
-//        currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-currentAsmFunc.stackSize),t6,s0));
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
 
         int overflowSize = 0;
 
@@ -399,16 +417,21 @@ public class InstSelector {//构造函数那里有bug
             for (int i=0;i<inst.params.size();i++){
                 if (i<=7){
                     Operand operand = inst.params.get(i);
-                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    PhysicalReg physicalReg = null;//getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    if (loopDepth==0)physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    else physicalReg = getPhysicalReg(operand,false,live,true);//
+//                    if (physicalReg==null)System.out.println("nmsl");
                     currentAsmBlock.push_back(new MoveInst(currentAsmBlock,new PhysicalReg("a"+i,"cnm"),physicalReg));
                    if (i!=0){
-                       PhysicalReg fakeReg = new PhysicalReg("fake"+i);fakeReg.hadAlloc = true;
-                       fakeReg.phyType = atRegs.get(i-1).phyType;
-                       currentAsmFunc.setPhyReg(fakeReg);
+                       PhysicalReg fakeReg = new PhysicalReg("fake"+i,atRegs.get(i-1).phyType);//fakeReg.hadAlloc = true;
+                       //fakeReg.phyType = atRegs.get(i-1).phyType;
+                       currentAsmFunc.setPhyReg(fakeReg, currentAsmFunc.getLiveEnd(), currentAsmFunc.getLiveEnd());
                    }
                 }else {
                     Operand operand = inst.params.get(i);
-                    PhysicalReg physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    PhysicalReg physicalReg = null;//getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    if (loopDepth==0)physicalReg = getPhysicalReg(operand,false,currentAsmFunc.getLiveEnd(),true);//
+                    else physicalReg = getPhysicalReg(operand,false,live,true);//
                     overflowSize+=4;
                     currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(-overflowSize),physicalReg,sp));
                 }
@@ -417,46 +440,78 @@ public class InstSelector {//构造函数那里有bug
         currentAsmBlock.push_back(new ASM.AsmInst.CallInst(currentAsmBlock,inst.callee.name));
 
 
-      //  currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t0,s0,new IntegerImm(-size0)));
-        //currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t1,s0,new IntegerImm(-size1)));
-        //currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t2,s0,new IntegerImm(-size2)));
-
-//        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t3,s0,new IntegerImm(-size3)));
-//        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t4,s0,new IntegerImm(-size4)));
-//        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t5,s0,new IntegerImm(-size5)));
-//        currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,t6,s0,new IntegerImm(-size6)));
-
         if (inst.destReg!=null){
             Register register = (Register) inst.destReg;
-            PhysicalReg physicalReg = getPhysicalReg(register,true,0,false);
+            PhysicalReg physicalReg = getPhysicalReg(register,true,new liveValue(0),false);
             currentAsmBlock.push_back(new MoveInst(currentAsmBlock,physicalReg,a0));
+            //if (a0==null)System.out.println("nmsl");
         }
+
+
     }
 
     public void visitGetElementPtrInst(GetElementPtrInst inst) {
-        PhysicalReg dest = getPhysicalReg(inst.destReg,true,0,false);
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
+
+        PhysicalReg dest = getPhysicalReg(inst.destReg,true,live,false);
+
+
         if (inst.indexes.size()==2){//结构体
             Operand operand = inst.indexes.get(1);
             IntegerConst integerConst = (IntegerConst) operand;
             LlvmStructType llvmStructType = (LlvmStructType) ((LlvmPointerType) inst.pointer.type).pointeeType;
             int index = llvmStructType.getIndexAlign(integerConst.value);
             //System.out.println(index);
-            PhysicalReg pointer = getPhysicalReg(inst.pointer,false,dest.liveStart,true);
+            PhysicalReg pointer = null;//getPhysicalReg(inst.pointer,false,dest.liveStart,true);
+            if (loopDepth==0)pointer = getPhysicalReg(inst.pointer,false,dest.liveStart.getLast(),true);
+            else pointer = getPhysicalReg(inst.pointer,false,live,true);
             currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,dest,pointer,new IntegerImm(index)));
         }else {//数组
             Operand operand = inst.indexes.get(0);
-            PhysicalReg index = getPhysicalReg(operand,false,dest.liveStart,true);
+            PhysicalReg index = null;//getPhysicalReg(operand,false,dest.liveStart,true);
+            PhysicalReg pointer = null;//getPhysicalReg(inst.pointer,false,dest.liveStart,false);//t2
+            if (loopDepth==0){
+                index = getPhysicalReg(operand,false,dest.liveStart.getLast(),true);
+                pointer = getPhysicalReg(inst.pointer,false,dest.liveStart.getLast(),false);//t2
+            }else {
+                index = getPhysicalReg(operand,false,live,true);
+                pointer = getPhysicalReg(inst.pointer,false,live,false);//t2
+            }
             currentAsmBlock.push_back(new ITypeInst(currentAsmBlock, ITypeInst.ITypeOp.addi,t2,zero,new IntegerImm(4)));
             currentAsmBlock.push_back(new RTypeInst(currentAsmBlock, RTypeInst.RTypeOp.mul,index,index,t2));
-            PhysicalReg pointer = getPhysicalReg(inst.pointer,false,dest.liveStart,false);//t2
             currentAsmBlock.push_back(new RTypeInst(currentAsmBlock, RTypeInst.RTypeOp.add,dest,index,pointer));
         }
+
+
     }
 
     public void visitIcmpInst(IcmpInst inst) {
-        PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
-        PhysicalReg value1 = getPhysicalReg(inst.value1, false,dest.liveStart,true);
-        PhysicalReg value2 = getPhysicalReg(inst.value2, false,dest.liveStart,false);
+        //PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
+        //PhysicalReg value1 = getPhysicalReg(inst.value1, false,dest.liveStart,true);
+        //PhysicalReg value2 = getPhysicalReg(inst.value2, false,dest.liveStart,false);
+
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
+
+        PhysicalReg dest = null;
+        PhysicalReg value1 = null;
+        PhysicalReg value2 = null;
+        if (loopDepth!=0){
+            dest = getPhysicalReg(inst.destReg,true,live,false);
+            value1 = getPhysicalReg(inst.value1,false,live,true);
+            value2 = getPhysicalReg(inst.value2, false,live,false);
+        }else {
+            dest = getPhysicalReg(inst.destReg, true,currentAsmFunc.getLiveEnd(),false);
+            value1 = getPhysicalReg(inst.value1, false,dest.liveStart.getLast(),true);
+            value2 = getPhysicalReg(inst.value2, false,dest.liveStart.getLast(),false);
+        }
+
+
         switch (inst.condOp){
             case eq:{
                 currentAsmBlock.push_back(new RTypeInst(currentAsmBlock, RTypeInst.RTypeOp.sub,value1,value1,value2));
@@ -489,45 +544,103 @@ public class InstSelector {//构造函数那里有bug
     }
 
     public void visitLoadInst(LoadInst inst) {
-        PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
-        PhysicalReg src = getPhysicalReg(inst.pointer,false,0,false);
-        if (inst.pointer instanceof GlobalOperand){
-            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,src,new RelocationImm(RelocationImm.Type.lo,((GlobalOperand) inst.pointer).name)));
-        }else if (src.isAddress){
-            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,s0,new IntegerImm(src.offset)));
+        PhysicalReg dest = null;
+        PhysicalReg src = null;
+        if (loopDepth!=0){
+            dest = getPhysicalReg(inst.destReg,true,live,false);
+            src = getPhysicalReg(inst.pointer,false,live,false);
         }else {
-            currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,src,new IntegerImm(0)));
+            dest = getPhysicalReg(inst.destReg, true,currentAsmFunc.getLiveEnd(),false);
+            src = getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),false);
         }
+
+
+        if (inst.pointer.isAlloc){
+            currentAsmBlock.push_back(new ASM.AsmInst.MoveInst(currentAsmBlock,dest,src));
+           // System.out.println("smdx");
+            //if (src==null)System.out.println("nmsl");
+        }else {
+            if (inst.pointer instanceof GlobalOperand){
+                currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,src,new RelocationImm(RelocationImm.Type.lo,((GlobalOperand) inst.pointer).name)));
+            }else if (src.isAddress){
+                currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,s0,new IntegerImm(src.offset)));
+            }else {
+                currentAsmBlock.push_back(new ASM.AsmInst.LoadInst(currentAsmBlock, ASM.AsmInst.LoadInst.LoadTypeOp.lw,dest,src,new IntegerImm(0)));
+            }
+        }
+
     }
 
     public void visitRetInst(RetInst inst) {
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
         if (inst.value!=null){
-            PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),true);
+           // PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),true);
+            PhysicalReg value = null;
+            if (loopDepth!=0){
+                value = getPhysicalReg(inst.value,false,live,true);
+            }else {
+                value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),true);
+            }
+
+
             currentAsmBlock.push_back(new MoveInst(currentAsmBlock,a0,value));
         }
         currentAsmBlock.push_back(new JInst(currentAsmBlock, ".L"+tailBlock.name));
     }
 
     public void visitSextInst(SextInst inst) {
-        PhysicalReg dest = getPhysicalReg(inst.destReg, true,0,false);
-        PhysicalReg value = getPhysicalReg(inst.value, false,dest.liveStart,true);
+        PhysicalReg dest = null;
+        PhysicalReg value = null;
+        if (loopDepth!=0){
+            dest = getPhysicalReg(inst.destReg,true,live,false);
+            value = getPhysicalReg(inst.value,false,live,true);
+        }else {
+            dest = getPhysicalReg(inst.destReg,true,new liveValue(0),false);
+            value = getPhysicalReg(inst.value,false,dest.liveStart.getLast(),true);
+        }
+
+        //if (value==null)System.out.println("nmsl");
         currentAsmBlock.push_back(new MoveInst(currentAsmBlock,dest,value));
-//        dest.isVirtual = value.isVirtual;;
-//        dest.isAddress = value.isAddress;
-//        dest.offset = value.offset;
-//        dest.phyType = value.phyType;
     }
 
     public void visitStoreInst(StoreInst inst) {
-        PhysicalReg pointer = getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),true);
-        PhysicalReg value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),false);
-        if (inst.pointer instanceof GlobalOperand){
-            currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new RelocationImm(RelocationImm.Type.lo,((GlobalOperand) inst.pointer).name),value,pointer));
-        }else if (pointer.isAddress){
-            currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(pointer.offset),value,s0));
+//        if (inst.isLoopBegin){
+//            if (loopDepth==0) live = new liveValue(0);
+//            loopDepth++;
+//        }
+
+        PhysicalReg pointer = null;//= getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),true);
+        PhysicalReg value = null;//getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),false);
+        if (loopDepth!=0){
+            pointer = getPhysicalReg(inst.pointer,false,live,true);
+            value = getPhysicalReg(inst.value,false,live,false);
         }else {
-            currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(0),value,pointer));
+            pointer = getPhysicalReg(inst.pointer,false,currentAsmFunc.getLiveEnd(),true);
+            value = getPhysicalReg(inst.value,false,currentAsmFunc.getLiveEnd(),false);
         }
+
+        if (value==null)System.out.println(inst.value);
+
+        //破掉ssa,所以liveBegin会有多个了，用链表
+
+        if (inst.pointer.isAlloc){
+            currentAsmBlock.push_back(new ASM.AsmInst.MoveInst(currentAsmBlock,pointer,value));
+        }
+        else {
+            if (inst.pointer instanceof GlobalOperand){
+                currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new RelocationImm(RelocationImm.Type.lo,((GlobalOperand) inst.pointer).name),value,pointer));
+            }else if (pointer.isAddress){
+                currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(pointer.offset),value,s0));
+            }else {
+                currentAsmBlock.push_back(new ASM.AsmInst.StoreInst(currentAsmBlock, ASM.AsmInst.StoreInst.StoreTypeOp.sw,new IntegerImm(0),value,pointer));
+            }
+        }
+
+        //有的不能转
+
     }
 
 }

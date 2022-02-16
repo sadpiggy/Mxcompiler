@@ -27,6 +27,7 @@ public class LoadInst extends asmInst{
 
     @Override
     public String toString() {
+
         PhysicalReg rs1_mid = rs1;
         PhysicalReg rs2_mid = rs2;
         if (isDead)return "";
