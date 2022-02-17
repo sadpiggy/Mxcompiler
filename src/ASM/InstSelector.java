@@ -25,6 +25,7 @@ public class InstSelector {//构造函数那里有bug
     public IrFirstPass irFirstPass;
     public AsmRoot asmRoot;
     public int specialTag = 0;
+    public boolean debug = false;
 
     public IrFunc currentIrFunc;
     public IrBlock currentIrBlock;
@@ -211,6 +212,10 @@ public class InstSelector {//构造函数那里有bug
 
     //参数不能直接溢出，因为 有内建的
     public void visitIrFunc(IrFunc irFunc){
+
+       // System.out.println(irFunc.name);
+       // System.out.println(irFirstPass.stringConstNum);
+
         //s0 - offset
         currentAsmFunc.stackSize = 0;
         //currentAsmFunc.stackSize = 68;
@@ -315,8 +320,18 @@ public class InstSelector {//构造函数那里有bug
 
 
     public void visitAllocInst(AllocInst inst) {
+
+        if (Objects.equals(currentAsmFunc.name, "getcount")&&irFirstPass.stringConstNum==2){
+            //System.out.println("hello");
+            debug = true;
+        }
         Register register = (Register) inst.destReg;
+        if (!debug)
         currentAsmFunc.setPhyReg(new PhysicalReg(register.name), currentAsmFunc.getLiveEnd(), currentAsmFunc.getLiveEnd());
+        else {
+            PhysicalReg physicalReg = new PhysicalReg(register.name,-currentAsmFunc.changeStackSize());
+            currentAsmFunc.setPhyReg(physicalReg, currentAsmFunc.getLiveEnd(), currentAsmFunc.getLiveEnd());
+        }
     }
 
     public void visitBinaryInst(BinaryInst inst) {

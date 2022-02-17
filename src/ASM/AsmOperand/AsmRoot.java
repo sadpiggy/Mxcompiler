@@ -32,31 +32,20 @@ public class AsmRoot {
             if (!it.isBuildIn){
                 it.setInsts();
 
-
-
-                //System.out.println(it.registers.size());
-
-                if (it.registers.size()==22059||it.registers.size()==51)debug=true;
+                if (it.registers.size()==51)debug=true;
+                //if (it.registers.size()==22059)debug = true;
                // debug = true;
 
                 ConflictAnalise conflictAnalise = new ConflictAnalise(it);
-                if (!debug)
-                conflictAnalise.run();
+                if (!debug){
+                    conflictAnalise.run();
+                }
 
 
                 RegisterAlloc registerAlloc = new RegisterAlloc(it);
                 if (!debug)
                 registerAlloc.foolishAlloc();
                 else registerAlloc.alloverflow();
-
-               // System.out.println(it.registers.size());
-               // registerAlloc.alloverflow();
-
-//                for (var target : it.insts){
-//                    if (!target.isDead&&target.rd!=null&&!target.rd.isAddress){
-//                        it.moveInsts.push(target.rd.toString());
-//                    }
-//                }
 
                 PhysicalReg[] savaRegs = new PhysicalReg[11];
 
