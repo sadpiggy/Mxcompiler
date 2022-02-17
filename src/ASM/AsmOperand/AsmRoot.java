@@ -18,6 +18,7 @@ public class AsmRoot {
     public ArrayList<AsmGlobalValue> asmGlobalValues;
     public ArrayList<AsmGlobalValue> asmStringContains;
     public boolean hasString;
+    boolean debug = false;
 
 
     public AsmRoot(){
@@ -30,24 +31,39 @@ public class AsmRoot {
         for (var it : asmFuncs){
             if (!it.isBuildIn){
                 it.setInsts();
+
+
+
+                //System.out.println(it.registers.size());
+
+                if (it.registers.size()==22059||it.registers.size()==51)debug=true;
+               // debug = true;
+
                 ConflictAnalise conflictAnalise = new ConflictAnalise(it);
+                if (!debug)
                 conflictAnalise.run();
+
+
                 RegisterAlloc registerAlloc = new RegisterAlloc(it);
+                if (!debug)
                 registerAlloc.foolishAlloc();
+                else registerAlloc.alloverflow();
+
+               // System.out.println(it.registers.size());
                // registerAlloc.alloverflow();
 
-                for (var target : it.insts){
-                    if (!target.isDead&&target.rd!=null&&!target.rd.isAddress){
-                        it.moveInsts.push(target.rd.toString());
-                    }
-                }
+//                for (var target : it.insts){
+//                    if (!target.isDead&&target.rd!=null&&!target.rd.isAddress){
+//                        it.moveInsts.push(target.rd.toString());
+//                    }
+//                }
 
                 PhysicalReg[] savaRegs = new PhysicalReg[11];
 
                 it.blocks.getLast().insts.removeLast();
 
                 for (int index=1;index<=11;index++){
-                    if (it.moveInsts.contains("s"+index)){
+                    if (it.useSreg[index]){
                         //savaRegs[index-1] = new PhysicalReg(it.name+"_s"+index,-it.changeStackSize());
                         it.blocks.getFirst().push_front(new StoreInst(it.blocks.getFirst(), StoreInst.StoreTypeOp.sw,new IntegerImm(-it.changeStackSize()),new PhysicalReg("s"+index,"s"+index),new PhysicalReg("sp","sp")));
                         it.blocks.getLast().push_back(new LoadInst(it.blocks.getLast(), LoadInst.LoadTypeOp.lw,new PhysicalReg("s"+index,"s"+index),new PhysicalReg("sp","sp"),new IntegerImm(-it.stackSize)));

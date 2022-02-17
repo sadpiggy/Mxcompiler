@@ -27,7 +27,7 @@ public class AsmFunc {
     public ITypeInst tailSpInst = null;
     public LinkedList<asmInst>insts = null;
     private int callTag = 0;
-    public LinkedList<String>moveInsts = new LinkedList<>();
+    public boolean[] useSreg = new boolean[12];
 //    public LinkedList<asmInst>calleeSaveInsts1 = new LinkedList<>();
 //    public LinkedList<asmInst>calleeSaveInsts2 = new LinkedList<>();
 //    public LinkedList<asmInst>callerSaveInsts = new LinkedList<>();
@@ -131,6 +131,7 @@ public class AsmFunc {
 
     public AsmFunc(String name,boolean isBuildIn){
         this.name = name;
+        for (int i=0;i<=11;i++)useSreg[i]=false;
         //virtualRegs = new HashMap<>();
         blocks = new LinkedList<>();
         this.isBuildIn = isBuildIn;
@@ -147,21 +148,7 @@ public class AsmFunc {
     public void printAsm(int i) throws FileNotFoundException {
         if (!isBuildIn){
 
-//            for (var it : insts){
-//                if (!it.isDead&&it.rd!=null&&!it.rd.isAddress){
-//                    moveInsts.push(it.rd.toString());
-//                }
-//            }
-//
-//            PhysicalReg[] savaRegs = new PhysicalReg[11];
-//
-//            for (int index=1;index<=11;index++){
-//                if (moveInsts.contains("s"+index)){
-//                    savaRegs[index-1] = new PhysicalReg(name+"_s"+index,-changeStackSize());
-//                    blocks.getFirst().push_front(new MoveInst(blocks.getFirst(),savaRegs[index-1], new PhysicalReg("s"+index,"s"+index),true));
-//                    blocks.getLast().push_back(new MoveInst(blocks.getLast(), new PhysicalReg("s"+index,"s"+index),savaRegs[index-1],true));
-//                }
-//            }
+
 
 
 

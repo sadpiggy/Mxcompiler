@@ -26,7 +26,7 @@ public class StoreInst extends asmInst{
 
     @Override
     public String toString() {
-        if (isDead)return "";
+        //if (isDead)return "";
         PhysicalReg rs1_mid = rs1;
         PhysicalReg rs2_mid = rs2;
         StringBuilder stringBuilder = new StringBuilder();

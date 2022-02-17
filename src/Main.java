@@ -68,7 +68,7 @@ public class Main{
 
                 asmRoot.printAsm(System.out);
                 //FEN ZHI!!!
-               // irFirstPass.printIr();
+              // irFirstPass.printIr();
                 //sdjs
             }
 

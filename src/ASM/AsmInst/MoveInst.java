@@ -36,7 +36,7 @@ public class MoveInst extends asmInst{
         String s0 = "(s0)";
         if (isSp) s0 = "(sp)";
         PhysicalReg rs1_mid = rs1;
-        if (isDead)return "";
+        //if (isDead)return "";
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
             if (!rd.isAddress){

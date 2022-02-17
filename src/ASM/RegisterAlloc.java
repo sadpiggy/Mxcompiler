@@ -31,7 +31,7 @@ public class RegisterAlloc {
         boolean value = true;
 
        // System.out.println(registers.size());
-        if (registers.size()==22059)debug=true;
+        //if (registers.size()==22059)debug=true;
 
 
         if (!debug){
@@ -68,7 +68,7 @@ public class RegisterAlloc {
     public void alloverflow(){
         ArrayList<PhysicalReg> registers = new ArrayList<>();//asmFunc.registers
         for (var it : asmFunc.registers){
-            if (it.isVirtual){
+            if (!it.isAddress&&!it.isPhysical){
                 registers.add(it);
             }
         }
@@ -122,6 +122,10 @@ public class RegisterAlloc {
             if (flag){
                 target.isVirtual=false;
                 target.phyType = it;
+                if (target.phyType.charAt(0)=='s'){
+                    int index = target.phyType.charAt(1) - '0';
+                    asmFunc.useSreg[index] = true;
+                }
                 target.isPhysical = true;
                 hadAlloc = true;
                 break;

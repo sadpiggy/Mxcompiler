@@ -9,7 +9,7 @@ public abstract class asmInst {
     public int name;
     public PhysicalReg rd,rs1,rs2;
     public asmInst nextInst = null;
-    public boolean isDead = false;
+    //public boolean isDead = false;
     public String specialTag = "";
 
     public AsmBlock belongTo;

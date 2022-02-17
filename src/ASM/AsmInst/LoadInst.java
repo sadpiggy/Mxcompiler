@@ -30,7 +30,7 @@ public class LoadInst extends asmInst{
 
         PhysicalReg rs1_mid = rs1;
         PhysicalReg rs2_mid = rs2;
-        if (isDead)return "";
+        //if (isDead)return "";
         StringBuilder stringBuilder = new StringBuilder();
         if (rs1.isAddress){
             stringBuilder.append("\t" + "lw	"+ t1 + ", " + rs1.toString() + "(s0)\n");
