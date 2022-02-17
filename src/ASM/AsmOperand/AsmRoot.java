@@ -2,8 +2,10 @@ package ASM.AsmOperand;
 
 import ASM.AsmBlock;
 import ASM.AsmFunc;
+import ASM.AsmInst.LoadInst;
 import ASM.AsmInst.MoveInst;
 import ASM.AsmInst.RetInst;
+import ASM.AsmInst.StoreInst;
 import ASM.ConflictAnalise;
 import ASM.RegisterAlloc;
 
@@ -16,6 +18,7 @@ public class AsmRoot {
     public ArrayList<AsmGlobalValue> asmGlobalValues;
     public ArrayList<AsmGlobalValue> asmStringContains;
     public boolean hasString;
+
 
     public AsmRoot(){
         asmFuncs = new ArrayList<>();
@@ -45,9 +48,11 @@ public class AsmRoot {
 
                 for (int index=1;index<=11;index++){
                     if (it.moveInsts.contains("s"+index)){
-                        savaRegs[index-1] = new PhysicalReg(it.name+"_s"+index,-it.changeStackSize());
-                        it.blocks.getFirst().push_front(new MoveInst(it.blocks.getFirst(),savaRegs[index-1], new PhysicalReg("s"+index,"s"+index),true));
-                        it.blocks.getLast().push_back(new MoveInst(it.blocks.getLast(), new PhysicalReg("s"+index,"s"+index),savaRegs[index-1],true));
+                        //savaRegs[index-1] = new PhysicalReg(it.name+"_s"+index,-it.changeStackSize());
+                        it.blocks.getFirst().push_front(new StoreInst(it.blocks.getFirst(), StoreInst.StoreTypeOp.sw,new IntegerImm(-it.changeStackSize()),new PhysicalReg("s"+index,"s"+index),new PhysicalReg("sp","sp")));
+                        it.blocks.getLast().push_back(new LoadInst(it.blocks.getLast(), LoadInst.LoadTypeOp.lw,new PhysicalReg("s"+index,"s"+index),new PhysicalReg("sp","sp"),new IntegerImm(-it.stackSize)));
+                        //it.blocks.getFirst().push_front(new MoveInst(it.blocks.getFirst(),savaRegs[index-1], new PhysicalReg("s"+index,"s"+index),true));
+                        //it.blocks.getLast().push_back(new MoveInst(it.blocks.getLast(), new PhysicalReg("s"+index,"s"+index),savaRegs[index-1],true));
                     }
                 }
 

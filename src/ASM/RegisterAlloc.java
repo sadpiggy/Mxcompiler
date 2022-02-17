@@ -25,21 +25,37 @@ public class RegisterAlloc {
                 registers.add(it);
             }
         }
+
+        boolean debug = false;
+
         boolean value = true;
-        while (value){
-            value = deleteNode(registers);
+
+       // System.out.println(registers.size());
+        if (registers.size()==22059)debug=true;
+
+
+        if (!debug){
+            while (value){
+                value = deleteNode(registers);
+            }
         }
+
+        //System.out.println(registers.size());
+
+       // if (registers.size()==21990)debug=true;
 
         while (registers.size()!=0){
             PhysicalReg reg = registers.get(0);
             allocSingle(reg);
             registers.remove(0);
-            if (registers.size()!=0){
-                value = true;
-                while (value){
-                    value = deleteNode(registers);
-                }
-            }
+           if (!debug){
+               if (registers.size()!=0){
+                   value = true;
+                   while (value){
+                       value = deleteNode(registers);
+                   }
+               }
+           }
         }
 
         while (regStack.size()!=0){

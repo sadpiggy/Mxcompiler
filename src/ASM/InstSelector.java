@@ -33,6 +33,7 @@ public class InstSelector {//构造函数那里有bug
     public AsmBlock tailBlock;
     public liveValue live = new liveValue(0);
     public int loopDepth = 0;
+    public liveValue liveB = null;
     //public liveValue oldLive = null;
    // boolean isInLoop = false;
     //boolean oldInLoop = false;
@@ -134,8 +135,8 @@ public class InstSelector {//构造函数那里有bug
                 }
                 if (loopDepth==0||!operand.isAlloc)return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),currentAsmFunc.getLiveEnd());
                 else {
-                    //if (operand.isAlloc)System.out.println("lalala");
-                    return currentAsmFunc.getPhyReg(register.name, currentAsmFunc.getLiveEnd(),live);
+
+                    return currentAsmFunc.getPhyReg(register.name, liveB,live);
                 }
             }else {
                 if (operand.isAlloc)
@@ -277,6 +278,7 @@ public class InstSelector {//构造函数那里有bug
             if (it.isLoopBegin){
                 if (loopDepth==0){
                     liveValue newLive = new liveValue(0);
+                    liveB = currentAsmFunc.getLiveEnd();
                     newLive.notChange = true;
                     newLive.oldLive = live;
                     live = newLive;

@@ -69,6 +69,12 @@ public class AsmFunc {
         return physicalReg;
     }
 
+    public PhysicalReg newPhyReg(String labelName,liveValue liveBegin,liveValue liveEnd){
+        PhysicalReg physicalReg = new PhysicalReg(labelName);//virtual
+        setPhyReg(physicalReg,new liveValue(liveBegin.value),liveEnd);
+        return physicalReg;
+    }
+
     public PhysicalReg newPhyReg(String phyType,String labelName){
         PhysicalReg physicalReg = new PhysicalReg(phyType,labelName);//phy
         setPhyReg(physicalReg,getLiveEnd(),getLiveEnd());
